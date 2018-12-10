@@ -1,53 +1,56 @@
 class Point{
-	constructor(private origonalValue: number, private channel: Channel){
+	constructor(private origonalValue: number){
 
 	}
 }
 
 interface Channel{
 	channelName: string;
-	ownerAxis: Axis;
+	point: Point;
 }
 
 class BarChannel implements Channel {
 	channelName: string;
-	ownerAxis: Axis;
-	constructor(Name:string,axis:BarAxis) {
+	point: Point;
+	constructor(name:string,point:Point) {
 		this.channelName = name;
-		this.ownerAxis = axis;
+		this.point = point;
 	}
 
 	get getChannelName(): string{
 		return this.channelName;
 	}
-
 }
 
 
 interface Axis {
 	axisName: string;
-	ownerGraph: Graph;
+	channels : Array<Channel>;
 }
 
 class BarAxis implements Axis {
 	
 	axisName: string;
-	ownerGraph: Graph;
-	constructor(name:string, graph:BarGraph) {
+	channels : Array<BarChannel> = new Array<BarChannel>();
+
+	constructor(name:string, channels: Array<BarChannel>) {
 		this.axisName = name;
-		this.ownerGraph = graph;
+		this.channels = channels;
 	}
 }
 
 interface Graph {
 	graphName: string;
+	dataAxis : Array<Axis>;
 }
 
 
 class BarGraph implements Graph {
 	graphName: string;
-	constructor(name : string) {
+	dataAxis:Array<BarAxis> = new Array<BarAxis>();
+	constructor(name : string,dataAxis:Array<BarAxis>) {
 		this.graphName = name;
+		this.dataAxis = dataAxis;
 	}
 }
 
@@ -80,8 +83,7 @@ class Grapher {
 	}
 
 	public GraphRequest(input : string){
-        alert(input);
-    	this.graphs.push(this.graphFactory.MakeGraph(input));
+    	this.graphs.push(this.graphFactory.MakeNewGraph(input,"test"));
 	}
 }
 
@@ -89,17 +91,48 @@ class GraphFactory{
     constructor (owner : Grapher){
 
     }
-    public  MakeGraph(input :string) : Graph{
-        let rows = input.split(/\r?\n/);//split the document into
+    public  MakeNewGraph(input :string, name: string) : Graph{
+        //known issues, this does not take into account csv files with arbitrary white space
+        //assumes titles at the top and side
+        //assumes amount of data is constant, so no colum has more data than the other for no reason or if data sets > amount of sets
 
-        return new BarGraph("test");
+        let rows = input.split(/\r?\n/);//split the document into rows
+       	
+       	let matrix : string[][];
+
+       	matrix = [];
+        for (var i = 0; i < rows.length; i++) {//setup a 2 dimensional array of all the values
+        	matrix[i] = [];
+        	matrix[i] = rows[i].split(",");
+        }
+
+		let titles = matrix[0];
+
+       	let amountOfChannels : number = rows.length ;
+       	let amountOfAxis : number = titles.length ;
+
+
+        let axis : Array<BarAxis> = new Array<BarAxis>();
+        
+       
+    	for (var c = 1; c < amountOfAxis ; c++) {//loop through arrays and make objects accordingly
+    		let channels : Array<BarChannel> = new Array<BarChannel>();
+
+    		for (var r = 1 ; r < amountOfChannels ; r++) {
+        		
+        		channels.push(new BarChannel(matrix[r][0],new Point(+matrix[r][c] )))
+        		
+        	}
+        	axis.push(new BarAxis(matrix[0][c],channels));
+        	
+        }
+        
+ 		let newGraph = new BarGraph(name,axis);
+       
+		console.log(newGraph);
+        return newGraph;
+        //tested with single csv with many different values and console.log constantly checking values
     }
 }
 
-/*
-var testgraph = new BarGraph("super mega data");
-var testchannel = new BarAxis("bar 1",testgraph);
-var one = new BarChannel("one",testchannel);
-var pint = new Point(2,one);
-*/
 let grapher = new Grapher();
