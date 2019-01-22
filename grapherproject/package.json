@@ -8,14 +8,15 @@
     "three": "^0.99.0"
   },
   "devDependencies": {
+    "@types/node": "^10.12.18",
     "ts-loader": "^5.3.1",
     "typescript": "^3.2.2",
-    "webpack": "^4.28.1",
+    "webpack": "4.28.1",
     "webpack-cli": "^3.1.2"
   },
   "scripts": {
     "start": "webpack --config webpack.config.js --watch --mode development",
-    "build": "webpack --config webpack.config.js --mode production && http-server"
+    "build": "webpack --config webpack.config.js --mode development && http-server"
   },
   "author": "",
   "license": "ISC"
