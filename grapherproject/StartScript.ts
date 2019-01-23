@@ -1,11 +1,11 @@
 /**
  * Primary ThreeJS File
  *
- *
- *
  */
 
+
 const potato = require('./potato');
+const fs = require('fs');
 
 console.log(potato.age);
 
@@ -112,7 +112,7 @@ class GraphFactory{
         let matrix : string[][];
 
         matrix = [];
-        for (var i = 0; i < rows.length; i++) {//setup a 2 dimensional array of all the values
+        for (let i = 0; i < rows.length; i++) {//setup a 2 dimensional array of all the values
             matrix[i] = [];
             matrix[i] = rows[i].split(",");
         }
@@ -129,7 +129,7 @@ class GraphFactory{
         for (let c = 1; c < amountOfAxis ; c++) {//loop through arrays and make objects accordingly
             let channels : Array<BarChannel> = new Array<BarChannel>();
 
-            for (var r = 1 ; r < amountOfChannels ; r++) {
+            for (let r = 1 ; r < amountOfChannels ; r++) {
 
                 channels.push(new BarChannel(matrix[r][0],new Point(+matrix[r][c] )))
 
@@ -147,3 +147,21 @@ class GraphFactory{
 }
 
 let grapher = new Grapher();
+
+document.getElementById('input_file').addEventListener('change', getFile)
+
+let inputManager = grapher.GetInputManager();
+
+function getFile(event: { target: any; }) {
+    const input = event.target
+    if ('files' in input && input.files.length > 0) {//works with repeat changes to file importing
+
+        inputManager.MakeNewBarGraph(fs.readFileSync(input.files[0],'utf8'));
+
+        let target : any= document.getElementById('content-target');
+        target.value = input.files[0];
+    }
+}
+
+
+
