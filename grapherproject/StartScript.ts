@@ -5,7 +5,6 @@
 
 
 const potato = require('./potato');
-const fs = require('fs');
 
 console.log(potato.age);
 
@@ -148,20 +147,37 @@ class GraphFactory{
 
 let grapher = new Grapher();
 
+
+
+
+
+
+
 document.getElementById('input_file').addEventListener('change', getFile)
 
 let inputManager = grapher.GetInputManager();
 
-function getFile(event: { target: any; }) {
-    const input = event.target
+function getFile(event:any) {
+    const input = event.target;
     if ('files' in input && input.files.length > 0) {//works with repeat changes to file importing
-
-        inputManager.MakeNewBarGraph(fs.readFileSync(input.files[0],'utf8'));
-
-        let target : any= document.getElementById('content-target');
-        target.value = input.files[0];
+        placeFileContent(document.getElementById('content-target'),input.files[0]);//uses only the first file if multiple are chosen
     }
 }
 
+function placeFileContent(target: any, file: any) {
+    //readFileContent(file).then(content => {target.value = content}).catch(error => console.log(error));
 
+    // @ts-ignore
+    readFileContent(file).then(content => {inputManager.MakeNewBarGraph(content);target.value = content}).catch(error => console.log(error));
 
+}
+
+function readFileContent(file : any) {
+    const reader = new FileReader()
+    return new Promise((resolve, reject) => {
+        // @ts-ignore
+        reader.onload = event => resolve(event.target.result);
+        reader.onerror = error => reject(error);
+        reader.readAsText(file);
+    })
+}
