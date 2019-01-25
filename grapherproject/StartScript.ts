@@ -93,7 +93,12 @@ class Grapher {
     }
 
     public GraphRequest(input : string){
-        this.graphs.push(this.graphFactory.MakeNewGraph(input,"test"));
+        let newGraph = this.graphFactory.MakeNewGraph(input,"test");
+
+        console.log(newGraph);
+        if (newGraph != null){
+            this.graphs.push(newGraph);
+        }
     }
 }
 
@@ -107,7 +112,9 @@ class GraphFactory{
         //assumes amount of data is constant, so no colum has more data than the other for no reason or if data sets > amount of sets
 
         let rows = input.split(/\r?\n/);//split the document into rows
-
+        if (rows.length <=1 ){
+            return null;
+        }
         let matrix : string[][];
 
         matrix = [];
@@ -139,7 +146,6 @@ class GraphFactory{
 
         let newGraph = new BarGraph(name,axis);
 
-        console.log(newGraph);
         return newGraph;
         //tested with single csv with many different values and console.log constantly checking values
     }
