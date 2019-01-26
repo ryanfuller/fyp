@@ -1,185 +1,85 @@
 /**
- * Primary ThreeJS File
+ * Primary startup file
  *
  */
 
-
-const potato = require('./potato');
-
-console.log(potato.age);
-
-class Point{
-    constructor(private origonalValue: number){
-
-    }
-}
-
-interface Channel{
-    channelName: string;
-    point: Point;
-}
-
-class BarChannel implements Channel {
-    channelName: string;
-    point: Point;
-    constructor(name:string,point:Point) {
-        this.channelName = name;
-        this.point = point;
-    }
-
-    get getChannelName(): string{
-        return this.channelName;
-    }
-}
-
-
-interface Axis {
-    axisName: string;
-    channels : Array<Channel>;
-}
-
-class BarAxis implements Axis {
-
-    axisName: string;
-    channels : Array<BarChannel> = new Array<BarChannel>();
-
-    constructor(name:string, channels: Array<BarChannel>) {
-        this.axisName = name;
-        this.channels = channels;
-    }
-}
-
-interface Graph {
-    graphName: string;
-    dataAxis : Array<Axis>;
-}
-
-
-class BarGraph implements Graph {
-    graphName: string;
-    dataAxis:Array<BarAxis> = new Array<BarAxis>();
-    constructor(name : string,dataAxis:Array<BarAxis>) {
-        this.graphName = name;
-        this.dataAxis = dataAxis;
-    }
-}
-
-class InputManager{
-    owner : Grapher;
-    constructor (owner : Grapher){
-        this.owner=owner;
-    }
-    public MakeNewBarGraph( rawInput : string ) {
-        //check for faulty files here
-        this.owner.GraphRequest(rawInput);
-    }
-}
-
-
-
+import {DataSet} from "./DataSetClasses";
+import {DataSetFactory} from "./DataSetFactory";
+/*
+* main parent class that controls everything
+* */
 class Grapher {
     private inputManager = new InputManager(this);
-    private graphFactory = new GraphFactory(this);
+    private dataSetFactory = new DataSetFactory();
 
-    private graphs : Array<Graph> = new Array<Graph>();
+    //private graphs : Array<Graph> = new Array<Graph>();
+    private dataSets : Array<DataSet> = new Array<DataSet>();
 
     constructor() {
-
     }
-
 
     public GetInputManager(){
         return this.inputManager;
     }
 
-    public GraphRequest(input : string){
-        let newGraph = this.graphFactory.MakeNewGraph(input,"test");
+    public CreateDataSetRequest(input : string,name:string,format:string){
+        let newDataSet = this.dataSetFactory.CreateNewDataSet(input,name,format);
 
-        console.log(newGraph);
-        if (newGraph != null){
-            this.graphs.push(newGraph);
+        console.log(newDataSet);
+        if (newDataSet != null){
+            this.dataSets.push(newDataSet);
         }
     }
 }
 
-class GraphFactory{
+
+/*
+* manages the input given to it by the ui and then communicates functions accordingly
+* */
+class InputManager{
+    owner : Grapher;
     constructor (owner : Grapher){
-
+        this.owner=owner;
+        document.getElementById('input_file').addEventListener('change', getFile)
     }
-    public  MakeNewGraph(input :string, name: string) : Graph{
-        //known issues, this does not take into account csv files with arbitrary white space
-        //assumes titles at the top and side
-        //assumes amount of data is constant, so no colum has more data than the other for no reason or if data sets > amount of sets
-
-        let rows = input.split(/\r?\n/);//split the document into rows
-        if (rows.length <=1 ){
-            return null;
-        }
-        let matrix : string[][];
-
-        matrix = [];
-        for (let i = 0; i < rows.length; i++) {//setup a 2 dimensional array of all the values
-            matrix[i] = [];
-            matrix[i] = rows[i].split(",");
-        }
-
-        let titles = matrix[0];
-
-        let amountOfChannels : number = rows.length ;
-        let amountOfAxis : number = titles.length ;
-
-
-        let axis : Array<BarAxis> = new Array<BarAxis>();
-
-
-        for (let c = 1; c < amountOfAxis ; c++) {//loop through arrays and make objects accordingly
-            let channels : Array<BarChannel> = new Array<BarChannel>();
-
-            for (let r = 1 ; r < amountOfChannels ; r++) {
-
-                channels.push(new BarChannel(matrix[r][0],new Point(+matrix[r][c] )))
-
-            }
-            axis.push(new BarAxis(matrix[0][c],channels));
-
-        }
-
-        let newGraph = new BarGraph(name,axis);
-
-        return newGraph;
-        //tested with single csv with many different values and console.log constantly checking values
+    public MakeNewDataSetFromFile(rawInput : string,name:string ,format:string) {
+        //check for faulty files here
+        this.owner.CreateDataSetRequest(rawInput,name,format);
     }
 }
+
 
 let grapher = new Grapher();
-
-
-
-
-
-
-
-document.getElementById('input_file').addEventListener('change', getFile)
-
 let inputManager = grapher.GetInputManager();
 
+/*
+* function passed to html elements to call when a file is passed to it
+* */
 function getFile(event:any) {
     const input = event.target;
     if ('files' in input && input.files.length > 0) {//works with repeat changes to file importing
         placeFileContent(document.getElementById('content-target'),input.files[0]);//uses only the first file if multiple are chosen
+
     }
 }
-
+/*
+* takes the blob file and creates a data set from it.
+* files are assumed to have a .extension and splits it based off of file name.
+* */
 function placeFileContent(target: any, file: any) {
-    //readFileContent(file).then(content => {target.value = content}).catch(error => console.log(error));
-
+    let fileName :string = file.name.split(".");
+    let name : string = fileName[0];
+    let format : string = fileName[1];
     // @ts-ignore
-    readFileContent(file).then(content => {inputManager.MakeNewBarGraph(content);target.value = content}).catch(error => console.log(error));
-
+    readFileContent(file).then(content => {inputManager.MakeNewDataSetFromFile(content,name,format);target.value = content}).catch(error => console.log(error));
 }
 
+/*
+* reads the file as a promise and returns the result when it is complete
+* if it cant it throws an error log
+* */
 function readFileContent(file : any) {
-    const reader = new FileReader()
+    const reader = new FileReader();
     return new Promise((resolve, reject) => {
         // @ts-ignore
         reader.onload = event => resolve(event.target.result);
