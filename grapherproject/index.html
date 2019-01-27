@@ -4,7 +4,7 @@
 		<title>fyp try</title>
 		<style>
 			body {
-				margin: 0; 
+				margin: 0;
 				overflow: hidden;
 			}
 			canvas {
@@ -12,20 +12,44 @@
 				width: 100%;
 				height: 100%;
 			}
+			.columnUI {
+				float: left;
+				width: 20%;
+			}
+			.columnDispay {
+				float: left;
+				width: 80%;
+
+			}
+			.row:after {
+				content: "";
+				display: table;
+				clear: both;
+			}
 		</style>
 	</head>
 	<body>
-		<div>
-			 <label for="input_file">Specify a file:</label><br>
-			 <input type="file" id="input_file">
+	<div class="row">
+		<div class="columnUI">
+			<div style="padding: 10px">
+				<div>
+					<label for="input_file">Specify a file:</label><br>
+					<input type="file" id="input_file">
+				</div>
+
+				<textarea id="content-target"></textarea>
+				<div>
+					<label>only accepts csv files that have the graph starting in the top most cell</label>
+					<label>results will appear in console</label>
+				</div>
+			</div>
+		</div>
+		<div class="columnDispay" id="DisplayArea">
+
 		</div>
 
-		<textarea id="content-target"></textarea>
-		<div>
-		 	<label>only accepts csv files that have the graph starting in the top most cell</label>
-		 	<label>results will appear in console</label>
-		</div>
+	</div>
+
 		<script src="dist/bundle.js"></script>
-
 	</body>
 </html>

@@ -1,5 +1,7 @@
 import {DataSet, DataSetAxis, DataSetChannel, Point} from "./DataSetClasses";
-
+/*
+* creates data sets from files given to it by the grapher for different types of files
+* */
 export class DataSetFactory{
     constructor (){
 

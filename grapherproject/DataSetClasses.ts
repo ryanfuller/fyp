@@ -1,4 +1,6 @@
-
+/*
+* class structures for data sets for use with making graphs with
+* */
 export class Point{
     constructor(private origonalValue: number){
 
@@ -38,11 +40,10 @@ export class DataSetAxis {
     }
 }
 
-
-
 export class DataSet {
     private name: string;
     private dataAxis:Array<DataSetAxis> = new Array<DataSetAxis>();
+    //private graph: Graph;
 
     constructor(name : string,dataAxis:Array<DataSetAxis>) {
         this.name = name;

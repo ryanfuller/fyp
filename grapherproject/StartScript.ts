@@ -11,6 +11,7 @@ import {DataSetFactory} from "./DataSetFactory";
 class Grapher {
     private inputManager = new InputManager(this);
     private dataSetFactory = new DataSetFactory();
+    private graphRenderer = new GraphRenderer();
 
     //private graphs : Array<Graph> = new Array<Graph>();
     private dataSets : Array<DataSet> = new Array<DataSet>();
@@ -31,6 +32,61 @@ class Grapher {
         }
     }
 }
+
+class GraphRenderer {
+    constructor(){
+        const THREE = require('three');
+        const OrbitControls = require('three-orbitcontrols');
+        let displayWidth = window.innerWidth * 0.8;
+        let displayHeight = window.innerHeight;
+
+        let scene = new THREE.Scene();
+        let camera = new THREE.PerspectiveCamera( 75, displayWidth/displayHeight, 0.1, 1000 );
+        let renderer = new THREE.WebGLRenderer();
+        let controls = new OrbitControls(camera,renderer.domElement);
+        controls.enableDamping = true;
+        controls.update();
+
+        renderer.setSize( window.innerWidth * 0.8,window.innerHeight);
+        document.getElementById("DisplayArea").appendChild( renderer.domElement );
+
+        let geometry = new THREE.BoxGeometry( 1, 1, 1 );
+        let material = new THREE.MeshBasicMaterial( { color: 0x00ff00 } );
+
+        scene.add( new THREE.AmbientLight( 0xcccccc ) );
+
+        let cube = new THREE.Mesh( geometry, material );
+
+        scene.add( cube );
+
+        camera.position.z = 5;
+
+
+        const animate = function () {
+            requestAnimationFrame( animate );
+
+            cube.rotation.x += 0.12;
+            cube.rotation.y += 0.01;
+            controls.update();
+
+            renderer.render( scene, camera );
+        };
+        animate();
+
+
+        window.addEventListener( 'resize', onWindowResize, false );
+        function onWindowResize() {
+
+            camera.aspect = displayWidth / displayHeight;
+            camera.updateProjectionMatrix();
+
+            renderer.setSize( displayWidth, displayWidth );
+
+        }
+
+    }
+}
+
 
 
 /*

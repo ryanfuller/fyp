@@ -7,7 +7,8 @@
     "file-system": "^2.2.2",
     "fs": "0.0.1-security",
     "http-server": "^0.11.1",
-    "three": "^0.99.0"
+    "three": "^0.99.0",
+    "three-orbitcontrols": "^2.99.1"
   },
   "devDependencies": {
     "@types/node": "^10.12.18",
