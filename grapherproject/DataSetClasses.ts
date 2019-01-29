@@ -1,9 +1,13 @@
+const THREE = require('three');
 /*
 * class structures for data sets for use with making graphs with
 * */
 export class Point{
     constructor(private origonalValue: number){
 
+    }
+    get GetValue(): number{
+        return this.origonalValue;
     }
 }
 
@@ -43,7 +47,7 @@ export class DataSetAxis {
 export class DataSet {
     private name: string;
     private dataAxis:Array<DataSetAxis> = new Array<DataSetAxis>();
-    //private graph: Graph;
+    private graph: Graph;
 
     constructor(name : string,dataAxis:Array<DataSetAxis>) {
         this.name = name;
@@ -52,7 +56,27 @@ export class DataSet {
     get GetName(): string{
         return this.name;
     }
-    get GetChannels (): Array<DataSetAxis>{
+    get GetAxis (): Array<DataSetAxis>{
         return this.dataAxis;
     }
+    get GetGraph() : Graph{
+        return this.graph;
+    }
+
 }
+
+//////////////////////////////////////////////
+/*visual graph classes*/
+export interface Graph {
+    GetTHREEGraph : ()=>any;
+}
+
+export class BarGraph implements Graph{
+
+
+    public GetTHREEGraph () {
+
+        return 1;
+    }
+}
+
