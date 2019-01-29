@@ -46,6 +46,7 @@ class GraphRenderer {
 
     private font = this.loader.parse(this.fontJSON);
 
+    private OneGraph : any;
 
     constructor(){
         let displayWidth = window.innerWidth * 0.8;
@@ -125,6 +126,9 @@ class GraphRenderer {
 
     }
     public  CreateBarGraphFromDataSet(dataSet : DataSet) : Graph{
+        if(dataSet.GetGraph != null){
+            this.scene.remove(this.OneGraph);
+        }
 
         if (dataSet.GetGraph == null && dataSet.GetAxis.length > 0 ){
             let barDistanceZ = 1;
@@ -154,10 +158,11 @@ class GraphRenderer {
             }
 
             for (let barAxisIter = 0;barAxisIter < dataSet.GetAxis.length;barAxisIter++ ){
+                let randoMaterial = new this.THREE.MeshLambertMaterial({color:Math.random()*0xffffff});
                 for(let barChannelIter = 0;barChannelIter <dataSet.GetAxis[barAxisIter].GetChannels.length;barChannelIter++){
                     let value = dataSet.GetAxis[barAxisIter].GetChannels[barChannelIter].GetPoint.GetValue * dataScalingFactor;
                     let cubegeo = new this.THREE.BoxGeometry( 1, value , 1 );
-                    let cube = new this.THREE.Mesh( cubegeo, RedMaterial );
+                    let cube = new this.THREE.Mesh( cubegeo, randoMaterial );
                     cube.castShadow = true;
                     cube.position.x = barChannelIter * barDistanceX;
                     cube.position.z = -barDistanceZ - barAxisIter;
@@ -168,7 +173,7 @@ class GraphRenderer {
 
 
             NameTextmesh.scale.set(graphScalingFactor,graphScalingFactor,graphScalingFactor);
-
+            this.OneGraph = NameTextmesh;
             this.scene.add(NameTextmesh);
         }
         let barGraph : BarGraph = new BarGraph();
