@@ -49,7 +49,8 @@ class GraphRenderer {
     private OneGraph : any;
 
     constructor(){
-        let displayWidth = window.innerWidth * 0.8;
+        let displayWidthRatio = 0.8;
+        let displayWidth = window.innerWidth * displayWidthRatio;
         let displayHeight = window.innerHeight;
 
         const scene = new this.THREE.Scene();
@@ -116,11 +117,13 @@ class GraphRenderer {
 
         window.addEventListener( 'resize', onWindowResize, false );
         function onWindowResize() {
+            displayWidth = window.innerWidth * displayWidthRatio;
+            displayHeight = window.innerHeight;
 
             camera.aspect = displayWidth / displayHeight;
             camera.updateProjectionMatrix();
 
-            renderer.setSize( displayWidth, displayWidth );
+            renderer.setSize( displayWidth, displayHeight );
 
         }
 
@@ -133,7 +136,7 @@ class GraphRenderer {
         if (dataSet.GetGraph == null && dataSet.GetAxis.length > 0 ){
             let barDistanceZ = 1;
             let barDistanceX = 1;
-            let dataScalingFactor = 0.3;
+            let dataScalingFactor = 0.5;
             let graphScalingFactor = 0.5;
             let textOffset = 0.1;
 
@@ -173,6 +176,8 @@ class GraphRenderer {
 
 
             NameTextmesh.scale.set(graphScalingFactor,graphScalingFactor,graphScalingFactor);
+            NameTextmesh.position.x = -dataSet.GetAxis[0].GetChannels.length/2 * graphScalingFactor;
+
             this.OneGraph = NameTextmesh;
             this.scene.add(NameTextmesh);
         }
