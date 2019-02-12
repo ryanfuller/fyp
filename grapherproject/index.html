@@ -32,16 +32,32 @@
 	<div class="row">
 		<div class="columnUI">
 			<div style="padding: 10px">
-				<div>
-					<label for="input_file">Specify a file:</label><br>
-					<input type="file" id="input_file">
-				</div>
 
 				<textarea id="content-target"></textarea>
 				<div>
-					<label>only accepts csv files that have the graph starting in the top most cell.</label>
-					<br>
-					<label>results will appear in console</label>
+					<div>
+						<b>file upload settings</b>
+						<br><br><label>plot type :</label>
+						<select id="plot_type">
+							<option selected="selected" value="surface">surface</option>
+							<option value="bar">bar</option>
+						</select>
+						<br><br><label>seperation type :</label>
+						<select id="seperation_type">
+							<option selected="selected" value="comma">comma</option>
+							<option value="space">space</option>
+						</select>
+						<br><br><label>text type :</label>
+						<select id="text_type">
+							<option selected="selected" value="none">none</option>
+							<option value="quotes">quotes</option>
+						</select>
+						<br><br>
+						<div>
+							<label for="input_file">Specify a file:</label><br>
+							<input type="file" id="input_file">
+						</div>
+					</div>
 				</div>
 			</div>
 		</div>

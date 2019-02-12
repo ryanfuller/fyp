@@ -23,10 +23,37 @@ class Grapher {
         return this.inputManager;
     }
 
-    public CreateDataSetRequest(input : string,name:string,format:string){
-        let newDataSet = this.dataSetFactory.CreateNewDataSet(input,name,format);
+    public CreateDataSetRequest(input : string,name:string,format:string,plotType : string,seperationType : string,textType :string){
+        let seperationChar = ",";
+        switch (seperationType) {
+            case "comma":{
+                seperationChar = ",";
+                break;
+            }
+            case "space":{
+                seperationChar = " ";
+                break;
+            }
+            default :{
+                seperationChar = ",";
+            }
+        }
+        let textChar = "";
+        switch (textType) {
+            case "none":{
+                textChar = "";
+                break;
+            }
+            case "quotes":{
+                textChar = "\"";
+                break;
+            }
+            default :{
+                textChar = "";
+            }
+        }
+        let newDataSet = this.dataSetFactory.CreateNewDataSet(input,name,format,plotType,seperationChar,textChar);
 
-        console.log(newDataSet);
         if (newDataSet != null){
             this.dataSets.push(newDataSet);
             this.graphRenderer.CreateBarGraphFromDataSet(newDataSet);
@@ -211,13 +238,26 @@ class GraphRenderer {
 * */
 class InputManager{
     owner : Grapher;
+    PlotTypeId = "plot_type";
+    SeperationTypeId = "seperation_type";
+    TextTypeId = "text_type";
     constructor (owner : Grapher){
         this.owner=owner;
         document.getElementById('input_file').addEventListener('change', getFile)
+
     }
+    //when any file is uploaded this is called by the async file upload button
+    //it then searches for the inputs given and then passes them to the grapher
     public MakeNewDataSetFromFile(rawInput : string,name:string ,format:string) {
-        //check for faulty files here
-        this.owner.CreateDataSetRequest(rawInput,name,format);
+
+        let plotTypeElement = <HTMLSelectElement>document.getElementById(this.PlotTypeId);//done every time to guarentee its loaded
+        let plotType = plotTypeElement.options[plotTypeElement.options.selectedIndex].value;//which is ok for an upload which doesnt happen often
+        let seperationElement = <HTMLSelectElement>document.getElementById(this.SeperationTypeId);
+        let seperationType = seperationElement.options[seperationElement.options.selectedIndex].value;
+        let textElement = <HTMLSelectElement>document.getElementById(this.SeperationTypeId);
+        let textType = textElement.options[textElement.options.selectedIndex].value;
+
+        this.owner.CreateDataSetRequest(rawInput,name,format,plotType,seperationType,textType);
     }
 }
 
