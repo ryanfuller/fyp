@@ -90,7 +90,7 @@ class GraphRenderer {
         mesh.position.y = -3;
         scene.add( mesh );
 
-        //cube
+        //cube test
         /*let geometry = new this.THREE.BoxGeometry( 1, 1, 1 );
         let material = new this.THREE.MeshPhongMaterial( { color: 0x00ff00 } );
 
@@ -98,6 +98,20 @@ class GraphRenderer {
         cube.castShadow = true;
         cube.position.y = -3;
         scene.add( cube );*/
+
+        //geometry test
+        let material = new this.THREE.MeshPhongMaterial( { color: 0x00ff00 } );
+        let geo = new this.THREE.Geometry();
+        geo.vertices.push(
+            new this.THREE.Vector3(-1,0,0),
+            new this.THREE.Vector3(0,1.2,0),
+            new this.THREE.Vector3(0,0.5,1),
+            new this.THREE.Vector3(1,0,2),
+        );
+        geo.faces.push(new this.THREE.Face3(0,1,2));
+
+        let generatedmesh = new this.THREE.Mesh(geo,material);
+        scene.add(generatedmesh);
 
         //camera
         camera.position.z = 5;
