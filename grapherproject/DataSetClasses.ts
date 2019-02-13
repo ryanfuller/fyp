@@ -2,16 +2,28 @@ const THREE = require('three');
 /*
 * class structures for data sets for use with making graphs with
 * */
-export class Point{
+export interface Point {
+    GetValue:()=>any;
+}
+export class SinglePoint implements Point{
     constructor(private origonalValue: number){
 
     }
-    get GetValue(): number{
+    public GetValue(): number{
+        return this.origonalValue;
+    }
+}
+export class TripplePoint implements Point{
+    constructor(private origonalValue: number[]){
+
+    }
+    public GetValue(): number[]{
         return this.origonalValue;
     }
 }
 
-export class DataSetChannel {
+
+export class DataSetChannel{
     private name: string;
     private point: Point;
     constructor(name:string,point:Point) {
@@ -62,7 +74,9 @@ export class DataSet {
     get GetGraph() : Graph{
         return this.graph;
     }
-
+    public SetGraph(graph : Graph){
+        this.graph = graph;
+    }
 }
 
 //////////////////////////////////////////////
@@ -73,10 +87,14 @@ export interface Graph {
 
 export class BarGraph implements Graph{
 
-
     public GetTHREEGraph () {
 
         return 1;
     }
 }
 
+export class SurfaceGraph implements Graph{
+    public GetTHREEGraph(){
+        return 1;
+    }
+}

@@ -23,40 +23,16 @@ class Grapher {
         return this.inputManager;
     }
 
-    public CreateDataSetRequest(input : string,name:string,format:string,plotType : string,seperationType : string,textType :string){
-        let seperationChar = ",";
-        switch (seperationType) {
-            case "comma":{
-                seperationChar = ",";
-                break;
-            }
-            case "space":{
-                seperationChar = " ";
-                break;
-            }
-            default :{
-                seperationChar = ",";
-            }
-        }
-        let textChar = "";
-        switch (textType) {
-            case "none":{
-                textChar = "";
-                break;
-            }
-            case "quotes":{
-                textChar = "\"";
-                break;
-            }
-            default :{
-                textChar = "";
-            }
-        }
+    public CreateDataSetRequest(input : string,name:string,format:string,plotType : string,seperationChar : string,textChar :string){
+
         let newDataSet = this.dataSetFactory.CreateNewDataSet(input,name,format,plotType,seperationChar,textChar);
 
         if (newDataSet != null){
+            console.log(newDataSet);
             this.dataSets.push(newDataSet);
-            this.graphRenderer.CreateBarGraphFromDataSet(newDataSet);
+            newDataSet.SetGraph(this.graphRenderer.CreateBarGraphFromDataSet(newDataSet));
+        }else {
+            alert("sorry the data supplied was not correctly formatted");
         }
     }
 }
@@ -204,7 +180,7 @@ class GraphRenderer {
             for (let barAxisIter = 0;barAxisIter < dataSet.GetAxis.length;barAxisIter++ ){
                 let randoMaterial = new this.THREE.MeshLambertMaterial({color:Math.random()*0xffffff});
                 for(let barChannelIter = 0;barChannelIter <dataSet.GetAxis[barAxisIter].GetChannels.length;barChannelIter++){
-                    let value = dataSet.GetAxis[barAxisIter].GetChannels[barChannelIter].GetPoint.GetValue * dataScalingFactor;
+                    let value = dataSet.GetAxis[barAxisIter].GetChannels[barChannelIter].GetPoint.GetValue() * dataScalingFactor;
                     let cubegeo = new this.THREE.BoxGeometry( 1, value , 1 );
                     let cube = new this.THREE.Mesh( cubegeo, randoMaterial );
                     cube.castShadow = true;
@@ -220,6 +196,7 @@ class GraphRenderer {
             NameTextmesh.position.x = -dataSet.GetAxis[0].GetChannels.length/2 * graphScalingFactor;
 
             this.OneGraph = NameTextmesh;
+
             this.scene.add(NameTextmesh);
         }
         let barGraph : BarGraph = new BarGraph();
@@ -257,7 +234,36 @@ class InputManager{
         let textElement = <HTMLSelectElement>document.getElementById(this.SeperationTypeId);
         let textType = textElement.options[textElement.options.selectedIndex].value;
 
-        this.owner.CreateDataSetRequest(rawInput,name,format,plotType,seperationType,textType);
+        let seperationChar = ",";
+        switch (seperationType) {
+            case "comma":{
+                seperationChar = ",";
+                break;
+            }
+            case "space":{
+                seperationChar = " ";
+                break;
+            }
+            default :{
+                seperationChar = ",";
+            }
+        }
+        let textChar = "";
+        switch (textType) {
+            case "none":{
+                textChar = "";
+                break;
+            }
+            case "quotes":{
+                textChar = "\"";
+                break;
+            }
+            default :{
+                textChar = "";
+            }
+        }
+
+        this.owner.CreateDataSetRequest(rawInput,name,format,plotType,seperationChar,textChar);
     }
 }
 

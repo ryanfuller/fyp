@@ -1,4 +1,4 @@
-import {DataSet, DataSetAxis, DataSetChannel, Point} from "./DataSetClasses";
+import {DataSet, DataSetAxis, DataSetChannel, SinglePoint,TripplePoint} from "./DataSetClasses";
 import {strict} from "assert";
 /*
 * creates data sets from files given to it by the grapher for different types of files
@@ -12,16 +12,18 @@ export class DataSetFactory{
     public  CreateNewDataSet(input:string,name:string,format:string,plotType:string,seperationChar:string,textChar:string):DataSet{
         this.SeperationChar = seperationChar;
         this.TextChar = textChar;
+        let matrixData = this.RemoveSpaceFromCSV(input);
+
         switch (format) {
             case "csv":{
                 console.log(plotType);
                 switch (plotType) {
                     case "bar":{
-                        return this.CreateNewBarDataSetFromCSV(input,name);
+                        return this.CreateNewBarDataSetFromCSV(matrixData,name);
                         break;
                     }
                     case "surface":{
-                        return this.CreateNewSurfaceDataSetFromCSV(input,name);
+                        return this.CreateNewSurfaceDataSetFromCSV(matrixData,name);
                         break;
                     }
                     default:{
@@ -36,12 +38,10 @@ export class DataSetFactory{
             }
         }
     }
-    private  CreateNewBarDataSetFromCSV(input :string, name: string) : DataSet{
+    private  CreateNewBarDataSetFromCSV(matrixData :string[][], name: string) : DataSet{
         //known issues, this does not take into account csv files with arbitrary white space
         //assumes titles at the top and side
         //assumes amount of data is constant, so no colum has more data than the other for no reason or if data sets > amount of sets
-
-        let matrixData = this.RemoveSpaceFromCSV(input);
 
 
         let titles = matrixData[0];
@@ -58,7 +58,7 @@ export class DataSetFactory{
 
             for (let r = 1 ; r < amountOfChannels ; r++) {
 
-                channels.push(new DataSetChannel(matrixData[r][0],new Point(+matrixData[r][c] )))
+                channels.push(new DataSetChannel(matrixData[r][0],new SinglePoint(+matrixData[r][c] )))
 
             }
             axis.push(new DataSetAxis(matrixData[0][c],channels));
@@ -72,12 +72,44 @@ export class DataSetFactory{
     }
 
 
-    private  CreateNewSurfaceDataSetFromCSV(input :string, name: string) : DataSet{
-        console.log(input);
-        let MatrixData = this.RemoveSpaceFromCSV(input);
+    private  CreateNewSurfaceDataSetFromCSV(matrixData :string[][], name: string) : DataSet{
+        console.log(matrixData);
+        if(matrixData[0].length > 3){
+            alert("your surface data has too many dimensions for this universe");
+            return null;
+        }
+        let xWidth=0;
+        let lastX= +matrixData[1][0];//doesnt check for text at the top. it asssumes it
 
 
-        let newGraph = null;
+        let axis : Array<DataSetAxis> = new Array<DataSetAxis>();
+        let channels : Array<DataSetChannel> = new Array<DataSetChannel>();
+        for (let c =1;c<matrixData.length;c++){
+
+            let point = [];
+            for (let r = 0 ; r < matrixData[c].length ; r++) {
+                point.push(+matrixData[c][r]);
+
+            }
+            console.log(point);
+            console.log(lastX);
+            if(lastX>point[0]){
+                axis.push(new DataSetAxis("",channels));
+                channels = new Array<DataSetChannel>();
+                lastX = point[0];
+            }else {
+                lastX = point[0];
+            }
+            channels.push(new DataSetChannel("",new TripplePoint(point )));
+
+        }
+        axis.push(new DataSetAxis("",channels));
+
+
+
+
+
+        let newGraph = new DataSet(name,axis);
         return newGraph;
         //tested with single csv with many different values and console.log constantly checking values
     }
