@@ -30,7 +30,19 @@ class Grapher {
         if (newDataSet != null){
             console.log(newDataSet);
             this.dataSets.push(newDataSet);
-            newDataSet.SetGraph(this.graphRenderer.CreateBarGraphFromDataSet(newDataSet));
+            switch (format) {
+                case "bar":{
+                    newDataSet.SetGraph(this.graphRenderer.CreateBarGraphFromDataSet(newDataSet));
+                    break;
+                }case "surface":{
+                    newDataSet.SetGraph(this.graphRenderer.CreateSurfaceGraphFromDataSet(newDataSet));
+                    break;
+                }
+                default : {
+                    break;
+                }
+            }
+
         }else {
             alert("sorry the data supplied was not correctly formatted");
         }
@@ -144,6 +156,49 @@ class GraphRenderer {
 
         }
 
+    }
+
+    public CreateSurfaceGraphFromDataSet(dataSet:DataSet):Graph{
+        if(dataSet.GetGraph != null){
+            this.scene.remove(this.OneGraph);
+        }
+
+        if (dataSet.GetGraph == null && dataSet.GetAxis.length > 0 ){
+
+            let graphScalingFactor = 0.5;
+
+            let blackMaterial = new this.THREE.MeshLambertMaterial({color:0x000000});
+            let RedMaterial = new this.THREE.MeshLambertMaterial({color:0xff0000});
+
+
+            let NameTextgeometry = new this.THREE.TextGeometry(dataSet.GetName,{font : this.font,size:0.5,height:0.1,material:0});
+            let NameTextmesh = new this.THREE.Mesh(NameTextgeometry,blackMaterial);
+
+            //text
+            //geometry test
+            let material = new this.THREE.MeshPhongMaterial( { color: 0x00ff00 } );
+            let geo = new this.THREE.Geometry();
+            geo.vertices.push(
+                new this.THREE.Vector3(-1,0,0),
+                new this.THREE.Vector3(0,1.2,0),
+                new this.THREE.Vector3(0,0.5,1),
+                new this.THREE.Vector3(1,0,2),
+            );
+            geo.faces.push(new this.THREE.Face3(0,1,2));
+
+
+            NameTextmesh.scale.set(graphScalingFactor,graphScalingFactor,graphScalingFactor);
+            NameTextmesh.position.x = -dataSet.GetAxis[0].GetChannels.length/2 * graphScalingFactor;
+
+            this.OneGraph = NameTextmesh;
+
+            this.scene.add(NameTextmesh);
+        }
+        let barGraph : BarGraph = new BarGraph();
+
+        //return barGraph;
+
+        return null;
     }
     public  CreateBarGraphFromDataSet(dataSet : DataSet) : Graph{
         if(dataSet.GetGraph != null){
