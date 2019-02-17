@@ -2,18 +2,8 @@ const THREE = require('three');
 /*
 * class structures for data sets for use with making graphs with
 * */
-export interface Point {
-    GetValue:()=>any;
-}
-export class SinglePoint implements Point{
-    constructor(private origonalValue: number){
-
-    }
-    public GetValue(): number{
-        return this.origonalValue;
-    }
-}
-export class TripplePoint implements Point{
+//acts as an array for all dimensions that may be on a point. 1 means its a single scaler. 3 is a tripple point
+export class Point {
     constructor(private origonalValue: number[]){
 
     }
@@ -21,6 +11,7 @@ export class TripplePoint implements Point{
         return this.origonalValue;
     }
 }
+
 
 
 export class DataSetChannel{
@@ -60,10 +51,16 @@ export class DataSet {
     private name: string;
     private dataAxis:Array<DataSetAxis> = new Array<DataSetAxis>();
     private graph: Graph;
+    private rangeX : number[] = [0,0];
+    private rangeY : number[] = [0,0];
+    private rangeZ : number[] = [0,0];
 
-    constructor(name : string,dataAxis:Array<DataSetAxis>) {
+    constructor(name : string,dataAxis:Array<DataSetAxis>,rangeX : number[],rangeY : number[],rangeZ : number[]) {
         this.name = name;
         this.dataAxis = dataAxis;
+        this.rangeX = rangeX;
+        this.rangeY = rangeY;
+        this.rangeZ = rangeZ;
     }
     get GetName(): string{
         return this.name;
@@ -76,6 +73,17 @@ export class DataSet {
     }
     public SetGraph(graph : Graph){
         this.graph = graph;
+    }
+    get GetRangeX():number[]{
+        return this.rangeX;
+    }
+
+    get GetRangeY():number[]{
+        return this.rangeY;
+    }
+
+    get GetRangeZ():number[]{
+        return this.rangeZ;
     }
 }
 

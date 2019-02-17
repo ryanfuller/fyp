@@ -5,6 +5,7 @@
 
 import {DataSet,Graph,BarGraph} from "./DataSetClasses";
 import {DataSetFactory} from "./DataSetFactory";
+import {isNumber} from "util";
 /*
 * main parent class that controls everything
 * */
@@ -30,7 +31,7 @@ class Grapher {
         if (newDataSet != null){
             console.log(newDataSet);
             this.dataSets.push(newDataSet);
-            switch (format) {
+            switch (plotType) {
                 case "bar":{
                     newDataSet.SetGraph(this.graphRenderer.CreateBarGraphFromDataSet(newDataSet));
                     break;
@@ -115,7 +116,7 @@ class GraphRenderer {
         scene.add( cube );*/
 
         //geometry test
-        let material = new this.THREE.MeshPhongMaterial( { color: 0x00ff00 } );
+        /*let material = new this.THREE.MeshPhongMaterial( { color: 0x00ff00 } );
         let geo = new this.THREE.Geometry();
         geo.vertices.push(
             new this.THREE.Vector3(-1,0,0),
@@ -127,7 +128,7 @@ class GraphRenderer {
 
         let generatedmesh = new this.THREE.Mesh(geo,material);
         scene.add(generatedmesh);
-
+*/
         //camera
         camera.position.z = 5;
 
@@ -166,27 +167,64 @@ class GraphRenderer {
         if (dataSet.GetGraph == null && dataSet.GetAxis.length > 0 ){
 
             let graphScalingFactor = 0.5;
+            let axisScalingFactorX = 6/(dataSet.GetRangeX[1] - dataSet.GetRangeX[0]) ;
+            let axisScalingFactorY = 6/(dataSet.GetRangeY[1] - dataSet.GetRangeY[0]) ;
+            let axisScalingFactorZ = 6/(dataSet.GetRangeZ[1] - dataSet.GetRangeZ[0]) ;
 
+            let wireMaterial = new this.THREE.LineBasicMaterial( { color: 0xffffff, linewidth: 2 } );
             let blackMaterial = new this.THREE.MeshLambertMaterial({color:0x000000});
-            let RedMaterial = new this.THREE.MeshLambertMaterial({color:0xff0000});
+            let redMaterial = new this.THREE.MeshLambertMaterial({color:0xff0000});
 
 
-            let NameTextgeometry = new this.THREE.TextGeometry(dataSet.GetName,{font : this.font,size:0.5,height:0.1,material:0});
+            let NameTextgeometry = new this.THREE.TextGeometry(dataSet.GetName,{font : this.font,size:0.5,height:0,material:0});
             let NameTextmesh = new this.THREE.Mesh(NameTextgeometry,blackMaterial);
 
-            //text
             //geometry test
-            let material = new this.THREE.MeshPhongMaterial( { color: 0x00ff00 } );
             let geo = new this.THREE.Geometry();
-            geo.vertices.push(
+
+            for (let a = 0; a<dataSet.GetAxis.length;a++){
+                for(let c = 0;c<dataSet.GetAxis[a].GetChannels.length;c++){
+
+                    let point =dataSet.GetAxis[a].GetChannels[c].GetPoint.GetValue();
+                    console.log(point);
+                    geo.vertices.push(new this.THREE.Vector3(point[0] * axisScalingFactorX, point[1]*axisScalingFactorY, point[2]*axisScalingFactorZ));
+                }
+            }
+            /*geo.vertices.push(
                 new this.THREE.Vector3(-1,0,0),
                 new this.THREE.Vector3(0,1.2,0),
                 new this.THREE.Vector3(0,0.5,1),
-                new this.THREE.Vector3(1,0,2),
-            );
-            geo.faces.push(new this.THREE.Face3(0,1,2));
+                new this.THREE.Vector3(1,0,2)
+            );*/
+            let width = dataSet.GetAxis[0].GetChannels.length;
+            let totalPoints = dataSet.GetAxis.length * width;
+            let normal =  new this.THREE.Vector3( 0, 1, 0 );
 
 
+            //squares for bottom right triangles
+            for (let i=0;i<totalPoints - width -1;i++){
+                if(i%width != width-1 || i == 0){
+                    geo.faces.push(new this.THREE.Face3(i, i+1, i+1+width,normal));
+                }
+            }
+            //squares for top left triangle
+            for (let i=0;i<totalPoints - width -1;i++){
+                if(i%width != width-1|| i == 0){
+                    console.log(i + " " +  (i+1) + "" + (i+1+width));
+                    geo.faces.push(new this.THREE.Face3(i,i+1+width,i+width,normal));
+                }
+            }
+
+
+            let mesh = new this.THREE.Mesh( geo, redMaterial );
+
+            NameTextmesh.add(mesh);
+
+            let geoEdge = new this.THREE.EdgesGeometry(mesh.geometry);
+            let generatedmesh = new this.THREE.LineSegments(geoEdge,wireMaterial);
+            NameTextmesh.add(generatedmesh);
+
+            //text
             NameTextmesh.scale.set(graphScalingFactor,graphScalingFactor,graphScalingFactor);
             NameTextmesh.position.x = -dataSet.GetAxis[0].GetChannels.length/2 * graphScalingFactor;
 
@@ -235,7 +273,7 @@ class GraphRenderer {
             for (let barAxisIter = 0;barAxisIter < dataSet.GetAxis.length;barAxisIter++ ){
                 let randoMaterial = new this.THREE.MeshLambertMaterial({color:Math.random()*0xffffff});
                 for(let barChannelIter = 0;barChannelIter <dataSet.GetAxis[barAxisIter].GetChannels.length;barChannelIter++){
-                    let value = dataSet.GetAxis[barAxisIter].GetChannels[barChannelIter].GetPoint.GetValue() * dataScalingFactor;
+                    let value = dataSet.GetAxis[barAxisIter].GetChannels[barChannelIter].GetPoint.GetValue()[0] * dataScalingFactor;
                     let cubegeo = new this.THREE.BoxGeometry( 1, value , 1 );
                     let cube = new this.THREE.Mesh( cubegeo, randoMaterial );
                     cube.castShadow = true;
