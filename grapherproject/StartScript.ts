@@ -3,12 +3,13 @@
  *
  */
 
-import {DataSet,Graph,BarGraph} from "./DataSetClasses";
+import {DataSet, Graph, BarGraph, SurfaceGraph} from "./DataSetClasses";
 import {DataSetFactory} from "./DataSetFactory";
-import {isNumber} from "util";
 /*
 * main parent class that controls everything
 * */
+
+
 class Grapher {
     private inputManager = new InputManager(this);
     private dataSetFactory = new DataSetFactory();
@@ -71,7 +72,7 @@ class GraphRenderer {
 
         const scene = new this.THREE.Scene();
         this.scene = scene;
-        let camera = new this.THREE.PerspectiveCamera( 75, displayWidth/displayHeight, 0.1, 1000 );
+        let camera =  new this.THREE.PerspectiveCamera( 75, displayWidth/displayHeight, 0.1, 1000 );//new this.THREE.OrthographicCamera( displayWidth / - 25, displayWidth / 25, displayHeight / 25, displayHeight / - 25, 0, 500 );
         let renderer = new this.THREE.WebGLRenderer();
         let controls = new this.OrbitControls(camera,renderer.domElement);
         controls.enableDamping = true;
@@ -165,11 +166,12 @@ class GraphRenderer {
         }
 
         if (dataSet.GetGraph == null && dataSet.GetAxis.length > 0 ){
-
+            let graphFixedSize = 6;
             let graphScalingFactor = 0.5;
-            let axisScalingFactorX = 6/(dataSet.GetRangeX[1] - dataSet.GetRangeX[0]) ;
-            let axisScalingFactorY = 6/(dataSet.GetRangeY[1] - dataSet.GetRangeY[0]) ;
-            let axisScalingFactorZ = 6/(dataSet.GetRangeZ[1] - dataSet.GetRangeZ[0]) ;
+            let axisScalingFactorX = graphFixedSize/(dataSet.GetRangeX[1] - dataSet.GetRangeX[0]) ;
+            let axisScalingFactorY = graphFixedSize/(dataSet.GetRangeY[1] - dataSet.GetRangeY[0]) ;
+            let axisScalingFactorZ = graphFixedSize/(dataSet.GetRangeZ[1] - dataSet.GetRangeZ[0]) ;
+
 
             let wireMaterial = new this.THREE.LineBasicMaterial( { color: 0xffffff, linewidth: 2 } );
             let blackMaterial = new this.THREE.MeshLambertMaterial({color:0x000000});
@@ -178,24 +180,38 @@ class GraphRenderer {
 
             let NameTextgeometry = new this.THREE.TextGeometry(dataSet.GetName,{font : this.font,size:0.5,height:0,material:0});
             let NameTextmesh = new this.THREE.Mesh(NameTextgeometry,blackMaterial);
+            NameTextmesh.position.y = graphFixedSize + 1;
 
-            //geometry test
+            //grids
+            let size = 20;
+            let divisions = 20;
+
+            let gridX = new this.THREE.GridHelper( size, divisions );
+            let gridY = new this.THREE.GridHelper( size, divisions );
+            gridY.rotation.x = -Math.PI / 2;
+            let gridZ = new this.THREE.GridHelper( size, divisions );
+            gridZ.rotation.z = -Math.PI / 2;
+            gridX.add(NameTextmesh);
+            gridX.add(gridY);
+            gridX.add(gridZ);
+
+
             let geo = new this.THREE.Geometry();
+
 
             for (let a = 0; a<dataSet.GetAxis.length;a++){
                 for(let c = 0;c<dataSet.GetAxis[a].GetChannels.length;c++){
 
                     let point =dataSet.GetAxis[a].GetChannels[c].GetPoint.GetValue();
-                    console.log(point);
                     geo.vertices.push(new this.THREE.Vector3(point[0] * axisScalingFactorX, point[1]*axisScalingFactorY, point[2]*axisScalingFactorZ));
+                    console.log(point);
+                    console.log(point[0] * axisScalingFactorX);
+                    console.log(point[1] * axisScalingFactorY);
+                    console.log(point[2] * axisScalingFactorZ);
                 }
             }
-            /*geo.vertices.push(
-                new this.THREE.Vector3(-1,0,0),
-                new this.THREE.Vector3(0,1.2,0),
-                new this.THREE.Vector3(0,0.5,1),
-                new this.THREE.Vector3(1,0,2)
-            );*/
+
+
             let width = dataSet.GetAxis[0].GetChannels.length;
             let totalPoints = dataSet.GetAxis.length * width;
             let normal =  new this.THREE.Vector3( 0, 1, 0 );
@@ -210,7 +226,6 @@ class GraphRenderer {
             //squares for top left triangle
             for (let i=0;i<totalPoints - width -1;i++){
                 if(i%width != width-1|| i == 0){
-                    console.log(i + " " +  (i+1) + "" + (i+1+width));
                     geo.faces.push(new this.THREE.Face3(i,i+1+width,i+width,normal));
                 }
             }
@@ -218,25 +233,72 @@ class GraphRenderer {
 
             let mesh = new this.THREE.Mesh( geo, redMaterial );
 
-            NameTextmesh.add(mesh);
-
             let geoEdge = new this.THREE.EdgesGeometry(mesh.geometry);
             let generatedmesh = new this.THREE.LineSegments(geoEdge,wireMaterial);
-            NameTextmesh.add(generatedmesh);
+            generatedmesh.add(mesh);
+            generatedmesh.rotation.x = -Math.PI / 2;
+            gridX.add(generatedmesh);
+
+
+            //graph axis objects
+            for(let x = 0; x<dataSet.GetAxis[0].GetChannels.length + 1;x++){
+                let value = x * dataSet.GetRangeX[1]/dataSet.GetAxis[0].GetChannels.length;
+                let numberGeo = new this.THREE.TextGeometry( "" + value ,{font : this.font,size:0.3,height:0,material:0});
+                let number = new this.THREE.Mesh(numberGeo,blackMaterial);
+                number.position.x =  x/dataSet.GetAxis[0].GetChannels.length  * graphFixedSize;
+                gridX.add(number);
+            }
+            let axisXGeo = new this.THREE.TextGeometry( "X" ,{font : this.font,size:0.3,height:0,material:0});
+            let axisX = new this.THREE.Mesh(axisXGeo,blackMaterial);
+            axisX.position.x = graphFixedSize + 1;
+            gridX.add(axisX);
+            for(let y = 0; y<dataSet.GetAxis[0].GetChannels.length + 1;y++){
+                let value =y  * dataSet.GetRangeY[1]/dataSet.GetAxis[0].GetChannels.length;
+                let numberGeo = new this.THREE.TextGeometry( "" + value ,{font : this.font,size:0.3,height:0,material:0});
+                let number = new this.THREE.Mesh(numberGeo,blackMaterial);
+
+                number.position.z = -y/dataSet.GetAxis[0].GetChannels.length  * graphFixedSize;
+
+                gridX.add(number);
+            }
+            let axisYGeo = new this.THREE.TextGeometry( "Y" ,{font : this.font,size:0.3,height:0,material:0});
+            let axisY = new this.THREE.Mesh(axisYGeo,blackMaterial);
+            axisY.position.z = -graphFixedSize - 1;
+            gridX.add(axisY);
+            for(let z = 0; z<dataSet.GetAxis[0].GetChannels.length + 1;z++){
+                let value =z  * dataSet.GetRangeZ[1]/dataSet.GetAxis[0].GetChannels.length;
+                let numberGeo = new this.THREE.TextGeometry( "" + value ,{font : this.font,size:0.3,height:0,material:0});
+                let number = new this.THREE.Mesh(numberGeo,blackMaterial);
+
+                number.position.y = z/dataSet.GetAxis[0].GetChannels.length  * graphFixedSize;
+
+                gridX.add(number);
+            }
+            let axisZGeo = new this.THREE.TextGeometry( "Z" ,{font : this.font,size:0.3,height:0,material:0});
+            let axisZ = new this.THREE.Mesh(axisZGeo,blackMaterial);
+            axisZ.position.y = graphFixedSize + 1;
+            gridX.add(axisZ);
 
             //text
-            NameTextmesh.scale.set(graphScalingFactor,graphScalingFactor,graphScalingFactor);
-            NameTextmesh.position.x = -dataSet.GetAxis[0].GetChannels.length/2 * graphScalingFactor;
+            //NameTextmesh.scale.set(graphScalingFactor,graphScalingFactor,graphScalingFactor);
+            //NameTextmesh.position.x = -dataSet.GetAxis[0].GetChannels.length/2 * graphScalingFactor;
 
-            this.OneGraph = NameTextmesh;
 
-            this.scene.add(NameTextmesh);
+
+            gridX.position.x = -graphFixedSize/2;
+            gridX.position.y = -graphFixedSize/2;
+            gridX.position.z = -graphFixedSize/2;
+
+
+
+            this.scene.remove(this.OneGraph);
+            this.OneGraph = gridX;
+
+            this.scene.add(gridX);
         }
-        let barGraph : BarGraph = new BarGraph();
+        let surfaceGraph : SurfaceGraph = new SurfaceGraph();
 
-        //return barGraph;
-
-        return null;
+        return surfaceGraph;
     }
     public  CreateBarGraphFromDataSet(dataSet : DataSet) : Graph{
         if(dataSet.GetGraph != null){
@@ -288,6 +350,7 @@ class GraphRenderer {
             NameTextmesh.scale.set(graphScalingFactor,graphScalingFactor,graphScalingFactor);
             NameTextmesh.position.x = -dataSet.GetAxis[0].GetChannels.length/2 * graphScalingFactor;
 
+            this.scene.remove(this.OneGraph);
             this.OneGraph = NameTextmesh;
 
             this.scene.add(NameTextmesh);
