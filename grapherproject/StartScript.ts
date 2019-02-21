@@ -176,7 +176,9 @@ class GraphRenderer {
             let wireMaterial = new this.THREE.LineBasicMaterial( { color: 0xffffff, linewidth: 2 } );
             let blackMaterial = new this.THREE.MeshLambertMaterial({color:0x000000});
             let redMaterial = new this.THREE.MeshLambertMaterial({color:0xff0000});
-
+            let randMaterial = new this.THREE.MeshLambertMaterial({color:Math.random()*0xffffff})
+            redMaterial.side = this.THREE.DoubleSide;
+            randMaterial.side = this.THREE.DoubleSide;
 
             let NameTextgeometry = new this.THREE.TextGeometry(dataSet.GetName,{font : this.font,size:0.5,height:0,material:0});
             let NameTextmesh = new this.THREE.Mesh(NameTextgeometry,blackMaterial);
@@ -231,7 +233,8 @@ class GraphRenderer {
             }
 
 
-            let mesh = new this.THREE.Mesh( geo, redMaterial );
+            let mesh = new this.THREE.Mesh( geo, randMaterial );
+
 
             let geoEdge = new this.THREE.EdgesGeometry(mesh.geometry);
             let generatedmesh = new this.THREE.LineSegments(geoEdge,wireMaterial);
@@ -243,7 +246,7 @@ class GraphRenderer {
             //graph axis objects
             for(let x = 0; x<dataSet.GetAxis[0].GetChannels.length + 1;x++){
                 let value = x * dataSet.GetRangeX[1]/dataSet.GetAxis[0].GetChannels.length;
-                let numberGeo = new this.THREE.TextGeometry( "" + value ,{font : this.font,size:0.3,height:0,material:0});
+                let numberGeo = new this.THREE.TextGeometry( "" + Number((value).toFixed(1)) ,{font : this.font,size:0.3,height:0,material:0});
                 let number = new this.THREE.Mesh(numberGeo,blackMaterial);
                 number.position.x =  x/dataSet.GetAxis[0].GetChannels.length  * graphFixedSize;
                 gridX.add(number);
@@ -254,7 +257,7 @@ class GraphRenderer {
             gridX.add(axisX);
             for(let y = 0; y<dataSet.GetAxis[0].GetChannels.length + 1;y++){
                 let value =y  * dataSet.GetRangeY[1]/dataSet.GetAxis[0].GetChannels.length;
-                let numberGeo = new this.THREE.TextGeometry( "" + value ,{font : this.font,size:0.3,height:0,material:0});
+                let numberGeo = new this.THREE.TextGeometry( "" + Number((value).toFixed(1))  ,{font : this.font,size:0.3,height:0,material:0});
                 let number = new this.THREE.Mesh(numberGeo,blackMaterial);
 
                 number.position.z = -y/dataSet.GetAxis[0].GetChannels.length  * graphFixedSize;
@@ -267,7 +270,7 @@ class GraphRenderer {
             gridX.add(axisY);
             for(let z = 0; z<dataSet.GetAxis[0].GetChannels.length + 1;z++){
                 let value =z  * dataSet.GetRangeZ[1]/dataSet.GetAxis[0].GetChannels.length;
-                let numberGeo = new this.THREE.TextGeometry( "" + value ,{font : this.font,size:0.3,height:0,material:0});
+                let numberGeo = new this.THREE.TextGeometry( "" + Number((value).toFixed(1)) ,{font : this.font,size:0.3,height:0,material:0});
                 let number = new this.THREE.Mesh(numberGeo,blackMaterial);
 
                 number.position.y = z/dataSet.GetAxis[0].GetChannels.length  * graphFixedSize;
