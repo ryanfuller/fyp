@@ -206,10 +206,7 @@ class GraphRenderer {
 
                     let point =dataSet.GetAxis[a].GetChannels[c].GetPoint.GetValue();
                     geo.vertices.push(new this.THREE.Vector3(point[0] * axisScalingFactorX, point[1]*axisScalingFactorY, point[2]*axisScalingFactorZ));
-                    console.log(point);
-                    console.log(point[0] * axisScalingFactorX);
-                    console.log(point[1] * axisScalingFactorY);
-                    console.log(point[2] * axisScalingFactorZ);
+
                 }
             }
 

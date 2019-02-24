@@ -13,29 +13,36 @@ export class DataSetFactory{
         this.SeperationChar = seperationChar;
         this.TextChar = textChar;
         let matrixData = this.RemoveSpaceFromCSV(input);
+        console.log(matrixData);
+        if(matrixData == null){
+            alert("your input file settings where not consistent with the file given");
+            return null;
+        }else{
 
-        switch (format) {
-            case "csv":{
-                console.log(plotType);
-                switch (plotType) {
-                    case "bar":{
-                        return this.CreateNewBarDataSetFromCSV(matrixData,name);
-                        break;
+            switch (format) {
+                case "csv":{
+                    console.log(plotType);
+                    switch (plotType) {
+                        case "bar":{
+                            return this.CreateNewBarDataSetFromCSV(matrixData,name);
+                            break;
+                        }
+                        case "surface":{
+                            return this.CreateNewSurfaceDataSetFromCSV(matrixData,name);
+                            break;
+                        }
+                        default:{
+                            alert("your plot type doesnt match what the grapher can handle");
+                            break;
+                        }
                     }
-                    case "surface":{
-                        return this.CreateNewSurfaceDataSetFromCSV(matrixData,name);
-                        break;
-                    }
-                    default:{
-                        alert("your plot type doesnt match what the grapher can handle");
-                        break;
-                    }
+                    break;
                 }
-                break;
+                default :{
+                    return null;
+                }
             }
-            default :{
-                return null;
-            }
+
         }
     }
     private  CreateNewBarDataSetFromCSV(matrixData :string[][], name: string) : DataSet{
@@ -81,9 +88,8 @@ export class DataSetFactory{
 
 
     private  CreateNewSurfaceDataSetFromCSV(matrixData :string[][], name: string) : DataSet{
-        console.log(matrixData);
         if(matrixData[0].length > 3){
-            alert("your surface data has too many dimensions for this universe");
+            alert("your surface is not formatted correctly for surface plotting");
             return null;
         }
         let lastX= +matrixData[1][0];//doesnt check for text at the top. it asssumes it
@@ -163,12 +169,20 @@ export class DataSetFactory{
 
         let matrix : string[][];
         matrix = [];
+        let testLine = rows[0];
+        if(!testLine.includes(this.SeperationChar)){
+            return null;
+        }
+        let lastLength = testLine.split(this.SeperationChar).length;
         for (let i = 0; i < rows.length - dataYstart; i++) {//setup a 2 dimensional array of all the values
             matrix[i] = [];
             let rowSlice = rows[i+dataYstart].split(this.SeperationChar);
-
+            if(rowSlice.length != lastLength){
+                return null;
+            }
             matrix[i] = rowSlice.slice(dataXStart,rowSlice.length);
         }
+
         //console.log(matrix);
 
         return matrix;
