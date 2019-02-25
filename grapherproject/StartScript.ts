@@ -26,9 +26,12 @@ class Grapher {
     }
 
     public CreateDataSetRequest(input : string,name:string,format:string,plotType : string,seperationChar : string,textChar :string){
-
-        let newDataSet = this.dataSetFactory.CreateNewDataSet(input,name,format,plotType,seperationChar,textChar);
-
+        let newDataSet;
+        try{
+            newDataSet = this.dataSetFactory.CreateNewDataSet(input,name,format,plotType,seperationChar,textChar);
+        }catch (e) {
+            alert(e.toString());
+        }
         if (newDataSet != null){
             console.log(newDataSet);
             this.dataSets.push(newDataSet);
@@ -46,7 +49,7 @@ class Grapher {
             }
 
         }else {
-            alert("sorry the data supplied was not correctly formatted");
+            alert("the data supplied was not formatted correctly, please check your file and retry");
         }
     }
 }

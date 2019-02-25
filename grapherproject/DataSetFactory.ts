@@ -15,8 +15,7 @@ export class DataSetFactory{
         let matrixData = this.RemoveSpaceFromCSV(input);
         console.log(matrixData);
         if(matrixData == null){
-            alert("your input file settings where not consistent with the file given");
-            return null;
+            throw new Error("a reading error occured, please check weather your file is comma or spaces.");
         }else{
 
             switch (format) {
@@ -32,7 +31,7 @@ export class DataSetFactory{
                             break;
                         }
                         default:{
-                            alert("your plot type doesnt match what the grapher can handle");
+                            throw new Error("your plot type doesnt match what the grapher can handle, please use either bar or surface");
                             break;
                         }
                     }
@@ -89,7 +88,7 @@ export class DataSetFactory{
 
     private  CreateNewSurfaceDataSetFromCSV(matrixData :string[][], name: string) : DataSet{
         if(matrixData[0].length > 3){
-            alert("your surface is not formatted correctly for surface plotting");
+            throw new Error("your data supplied is not consistent. check the columns are the same length and that you chose comma or space correctly.");
             return null;
         }
         let lastX= +matrixData[1][0];//doesnt check for text at the top. it asssumes it
