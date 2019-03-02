@@ -5,6 +5,8 @@
 
 import {DataSet, Graph, BarGraph, SurfaceGraph} from "./DataSetClasses";
 import {DataSetFactory} from "./DataSetFactory";
+import {type} from "os";
+const THREE = require('three');
 /*
 * main parent class that controls everything
 * */
@@ -18,6 +20,8 @@ class Grapher {
     //private graphs : Array<Graph> = new Array<Graph>();
     private dataSets : Array<DataSet> = new Array<DataSet>();
 
+    private selectedDataSet: DataSet;
+
     constructor() {
     }
 
@@ -25,6 +29,16 @@ class Grapher {
         return this.inputManager;
     }
 
+    public GetSelectedDataSet(){
+        return this.selectedDataSet;
+    }
+
+    public GetGraphRenderer(){
+        return this.graphRenderer;
+    }
+    public GetDataSets(){
+        return this.dataSets;
+    }
     public CreateDataSetRequest(input : string,name:string,format:string,plotType : string,seperationChar : string,textChar :string){
         let newDataSet;
         try{
@@ -35,6 +49,8 @@ class Grapher {
         if (newDataSet != null){
             console.log(newDataSet);
             this.dataSets.push(newDataSet);
+            this.selectedDataSet = this.dataSets[0];
+            console.log(this.dataSets);
             switch (plotType) {
                 case "bar":{
                     newDataSet.SetGraph(this.graphRenderer.CreateBarGraphFromDataSet(newDataSet));
@@ -52,46 +68,71 @@ class Grapher {
             alert("the data supplied was not formatted correctly, please check your file and retry");
         }
     }
+
+
 }
 
 class GraphRenderer {
-    private THREE = require('three');
     private OrbitControls = require('three-orbitcontrols');
 
     private fontJSON = require("./helvetiker_regular.typeface.json");
 
     private scene : any;
 
-    private loader = new this.THREE.FontLoader();
+    private camera : any;
+
+    private renderer: any;
+
+    private controls:any;
+
+    private loader = new THREE.FontLoader();
 
     private font = this.loader.parse(this.fontJSON);
 
     private OneGraph : any;
+
+    public GetCamera(){
+        return this.camera;
+    }
+    public GetScene(){
+        return this.scene;
+    }
+    public GetRenderer(){
+        return this.renderer;
+    }
+    public GetControls(){
+        return this.controls;
+    }
+
 
     constructor(){
         let displayWidthRatio = 0.8;
         let displayWidth = window.innerWidth * displayWidthRatio;
         let displayHeight = window.innerHeight;
 
-        const scene = new this.THREE.Scene();
+        const scene = new THREE.Scene();
         this.scene = scene;
-        let camera =  new this.THREE.PerspectiveCamera( 75, displayWidth/displayHeight, 0.1, 1000 );//new this.THREE.OrthographicCamera( displayWidth / - 25, displayWidth / 25, displayHeight / 25, displayHeight / - 25, 0, 500 );
-        let renderer = new this.THREE.WebGLRenderer();
+        let camera =  new THREE.PerspectiveCamera( 75, displayWidth/displayHeight, 0.1, 1000 );//new THREE.OrthographicCamera( displayWidth / - 25, displayWidth / 25, displayHeight / 25, displayHeight / - 25, 0, 500 );
+        this.camera = camera;
+        let renderer = new THREE.WebGLRenderer();
+        this.renderer = renderer;
         let controls = new this.OrbitControls(camera,renderer.domElement);
+        this.controls = controls;
         controls.enableDamping = true;
         controls.update();
 
+
         //scene
-        scene.background = new this.THREE.Color( 0x92ecfc );
-        scene.fog = new this.THREE.Fog( 0x92ecfc, 10, 50 );
+        scene.background = new THREE.Color( 0x92ecfc );
+        scene.fog = new THREE.Fog( 0x92ecfc, 10, 50 );
         renderer.setSize( window.innerWidth * 0.8,window.innerHeight);
         document.getElementById("DisplayArea").appendChild( renderer.domElement );
 
         //lights
-        let hemiLight = new this.THREE.HemisphereLight( 0xffffff, 0x444444 );
+        let hemiLight = new THREE.HemisphereLight( 0xffffff, 0x444444 );
         hemiLight.position.set( 0, 20, 0 );
         scene.add( hemiLight );
-        let dirLight = new this.THREE.DirectionalLight( 0xffffff );
+        let dirLight = new THREE.DirectionalLight( 0xffffff );
         dirLight.position.set( - 3, 10, - 10 );
         dirLight.castShadow = true;
         dirLight.shadow.camera.top = 2;
@@ -104,49 +145,39 @@ class GraphRenderer {
 
 
         //floor
-        let mesh = new this.THREE.Mesh( new this.THREE.PlaneBufferGeometry( 100, 100 ), new this.THREE.MeshPhongMaterial( { color: 0x999999, depthWrite: false } ) );
+        let mesh = new THREE.Mesh( new THREE.PlaneBufferGeometry( 100, 100 ), new THREE.MeshPhongMaterial( { color: 0x999999, depthWrite: false } ) );
         mesh.rotation.x = - Math.PI / 2;
         mesh.receiveShadow = true;
         mesh.position.y = -3;
         scene.add( mesh );
 
         //cube test
-        /*let geometry = new this.THREE.BoxGeometry( 1, 1, 1 );
-        let material = new this.THREE.MeshPhongMaterial( { color: 0x00ff00 } );
+        /*let geometry = new THREE.BoxGeometry( 1, 1, 1 );
+        let material = new THREE.MeshPhongMaterial( { color: 0x00ff00 } );
 
-        let cube = new this.THREE.Mesh( geometry, material );
+        let cube = new THREE.Mesh( geometry, material );
         cube.castShadow = true;
         cube.position.y = -3;
         scene.add( cube );*/
 
         //geometry test
-        /*let material = new this.THREE.MeshPhongMaterial( { color: 0x00ff00 } );
-        let geo = new this.THREE.Geometry();
+        /*let material = new THREE.MeshPhongMaterial( { color: 0x00ff00 } );
+        let geo = new THREE.Geometry();
         geo.vertices.push(
-            new this.THREE.Vector3(-1,0,0),
-            new this.THREE.Vector3(0,1.2,0),
-            new this.THREE.Vector3(0,0.5,1),
-            new this.THREE.Vector3(1,0,2),
+            new THREE.Vector3(-1,0,0),
+            new THREE.Vector3(0,1.2,0),
+            new THREE.Vector3(0,0.5,1),
+            new THREE.Vector3(1,0,2),
         );
-        geo.faces.push(new this.THREE.Face3(0,1,2));
+        geo.faces.push(new THREE.Face3(0,1,2));
 
-        let generatedmesh = new this.THREE.Mesh(geo,material);
+        let generatedmesh = new THREE.Mesh(geo,material);
         scene.add(generatedmesh);
 */
         //camera
         camera.position.z = 5;
 
 
-        const animate = function () {
-            requestAnimationFrame( animate );
-
-            //cube.rotation.x += 0.12;
-            //cube.rotation.y += 0.01;
-            controls.update();
-
-            renderer.render( scene, camera );
-        };
-        animate();
 
 
         window.addEventListener( 'resize', onWindowResize, false );
@@ -160,7 +191,6 @@ class GraphRenderer {
             renderer.setSize( displayWidth, displayHeight );
 
         }
-
     }
 
     public CreateSurfaceGraphFromDataSet(dataSet:DataSet):Graph{
@@ -176,39 +206,39 @@ class GraphRenderer {
             let axisScalingFactorZ = graphFixedSize/(dataSet.GetRangeZ[1] - dataSet.GetRangeZ[0]) ;
 
 
-            let wireMaterial = new this.THREE.LineBasicMaterial( { color: 0xffffff, linewidth: 2 } );
-            let blackMaterial = new this.THREE.MeshLambertMaterial({color:0x000000});
-            let redMaterial = new this.THREE.MeshLambertMaterial({color:0xff0000});
-            let randMaterial = new this.THREE.MeshLambertMaterial({color:Math.random()*0xffffff})
-            redMaterial.side = this.THREE.DoubleSide;
-            randMaterial.side = this.THREE.DoubleSide;
+            let wireMaterial = new THREE.LineBasicMaterial( { color: 0xffffff, linewidth: 2 } );
+            let blackMaterial = new THREE.MeshLambertMaterial({color:0x000000});
+            let redMaterial = new THREE.MeshLambertMaterial({color:0xff0000});
+            let randMaterial = new THREE.MeshLambertMaterial({color:Math.random()*0xffffff})
+            redMaterial.side = THREE.DoubleSide;
+            randMaterial.side = THREE.DoubleSide;
 
-            let NameTextgeometry = new this.THREE.TextGeometry(dataSet.GetName,{font : this.font,size:0.5,height:0,material:0});
-            let NameTextmesh = new this.THREE.Mesh(NameTextgeometry,blackMaterial);
+            let NameTextgeometry = new THREE.TextGeometry(dataSet.GetName,{font : this.font,size:0.5,height:0,material:0});
+            let NameTextmesh = new THREE.Mesh(NameTextgeometry,blackMaterial);
             NameTextmesh.position.y = graphFixedSize + 1;
 
             //grids
             let size = 20;
             let divisions = 20;
 
-            let gridX = new this.THREE.GridHelper( size, divisions );
-            let gridY = new this.THREE.GridHelper( size, divisions );
+            let gridX = new THREE.GridHelper( size, divisions );
+            let gridY = new THREE.GridHelper( size, divisions );
             gridY.rotation.x = -Math.PI / 2;
-            let gridZ = new this.THREE.GridHelper( size, divisions );
+            let gridZ = new THREE.GridHelper( size, divisions );
             gridZ.rotation.z = -Math.PI / 2;
             gridX.add(NameTextmesh);
             gridX.add(gridY);
-            gridX.add(gridZ);
+            gridY.add(gridZ);
 
 
-            let geo = new this.THREE.Geometry();
+            let geo = new THREE.Geometry();
 
 
             for (let a = 0; a<dataSet.GetAxis.length;a++){
                 for(let c = 0;c<dataSet.GetAxis[a].GetChannels.length;c++){
 
                     let point =dataSet.GetAxis[a].GetChannels[c].GetPoint.GetValue();
-                    geo.vertices.push(new this.THREE.Vector3(point[0] * axisScalingFactorX, point[1]*axisScalingFactorY, point[2]*axisScalingFactorZ));
+                    geo.vertices.push(new THREE.Vector3(point[0] * axisScalingFactorX, point[1]*axisScalingFactorY, point[2]*axisScalingFactorZ));
 
                 }
             }
@@ -216,70 +246,79 @@ class GraphRenderer {
 
             let width = dataSet.GetAxis[0].GetChannels.length;
             let totalPoints = dataSet.GetAxis.length * width;
-            let normal =  new this.THREE.Vector3( 0, 1, 0 );
+            let normal =  new THREE.Vector3( 0, 1, 0 );
 
 
             //squares for bottom right triangles
             for (let i=0;i<totalPoints - width -1;i++){
                 if(i%width != width-1 || i == 0){
-                    geo.faces.push(new this.THREE.Face3(i, i+1, i+1+width,normal));
+                    geo.faces.push(new THREE.Face3(i, i+1, i+1+width,normal));
                 }
             }
             //squares for top left triangle
             for (let i=0;i<totalPoints - width -1;i++){
                 if(i%width != width-1|| i == 0){
-                    geo.faces.push(new this.THREE.Face3(i,i+1+width,i+width,normal));
+                    geo.faces.push(new THREE.Face3(i,i+1+width,i+width,normal));
                 }
             }
 
 
-            let mesh = new this.THREE.Mesh( geo, randMaterial );
+            let mesh = new THREE.Mesh( geo, randMaterial );
 
 
-            let geoEdge = new this.THREE.EdgesGeometry(mesh.geometry);
-            let generatedmesh = new this.THREE.LineSegments(geoEdge,wireMaterial);
+            let geoEdge = new THREE.EdgesGeometry(mesh.geometry);
+            let generatedmesh = new THREE.LineSegments(geoEdge,wireMaterial);
             generatedmesh.add(mesh);
             generatedmesh.rotation.x = -Math.PI / 2;
             gridX.add(generatedmesh);
+            let NumberListX = new Array<typeof THREE.Object3D>();
+            let NumberListY = new Array<typeof THREE.Object3D>();
+            let NumberListZ = new Array<typeof THREE.Object3D>();
 
 
             //graph axis objects
             for(let x = 0; x<dataSet.GetAxis[0].GetChannels.length + 1;x++){
                 let value = x * dataSet.GetRangeX[1]/dataSet.GetAxis[0].GetChannels.length;
-                let numberGeo = new this.THREE.TextGeometry( "" + Number((value).toFixed(1)) ,{font : this.font,size:0.3,height:0,material:0});
-                let number = new this.THREE.Mesh(numberGeo,blackMaterial);
+                let numberGeo = new THREE.TextGeometry( "" + Number((value).toFixed(1)) ,{font : this.font,size:0.3,height:0,material:0});
+                let number = new THREE.Mesh(numberGeo,blackMaterial);
                 number.position.x =  x/dataSet.GetAxis[0].GetChannels.length  * graphFixedSize;
+                number.lookAt(this.camera.position);
+                NumberListX.push(number);
                 gridX.add(number);
             }
-            let axisXGeo = new this.THREE.TextGeometry( "X" ,{font : this.font,size:0.3,height:0,material:0});
-            let axisX = new this.THREE.Mesh(axisXGeo,blackMaterial);
+            let axisXGeo = new THREE.TextGeometry( "X" ,{font : this.font,size:0.3,height:0,material:0});
+            let axisX = new THREE.Mesh(axisXGeo,blackMaterial);
             axisX.position.x = graphFixedSize + 1;
+            NumberListX.push(axisX);
             gridX.add(axisX);
             for(let y = 0; y<dataSet.GetAxis[0].GetChannels.length + 1;y++){
                 let value =y  * dataSet.GetRangeY[1]/dataSet.GetAxis[0].GetChannels.length;
-                let numberGeo = new this.THREE.TextGeometry( "" + Number((value).toFixed(1))  ,{font : this.font,size:0.3,height:0,material:0});
-                let number = new this.THREE.Mesh(numberGeo,blackMaterial);
-
+                let numberGeo = new THREE.TextGeometry( "" + Number((value).toFixed(1))  ,{font : this.font,size:0.3,height:0,material:0});
+                let number = new THREE.Mesh(numberGeo,blackMaterial);
                 number.position.z = -y/dataSet.GetAxis[0].GetChannels.length  * graphFixedSize;
-
+                number.lookAt(this.camera.position);
+                NumberListY.push(number);
                 gridX.add(number);
             }
-            let axisYGeo = new this.THREE.TextGeometry( "Y" ,{font : this.font,size:0.3,height:0,material:0});
-            let axisY = new this.THREE.Mesh(axisYGeo,blackMaterial);
+            let axisYGeo = new THREE.TextGeometry( "Y" ,{font : this.font,size:0.3,height:0,material:0});
+            let axisY = new THREE.Mesh(axisYGeo,blackMaterial);
             axisY.position.z = -graphFixedSize - 1;
+            NumberListY.push(axisY);
             gridX.add(axisY);
             for(let z = 0; z<dataSet.GetAxis[0].GetChannels.length + 1;z++){
                 let value =z  * dataSet.GetRangeZ[1]/dataSet.GetAxis[0].GetChannels.length;
-                let numberGeo = new this.THREE.TextGeometry( "" + Number((value).toFixed(1)) ,{font : this.font,size:0.3,height:0,material:0});
-                let number = new this.THREE.Mesh(numberGeo,blackMaterial);
+                let numberGeo = new THREE.TextGeometry( "" + Number((value).toFixed(1)) ,{font : this.font,size:0.3,height:0,material:0});
+                let number = new THREE.Mesh(numberGeo,blackMaterial);
 
                 number.position.y = z/dataSet.GetAxis[0].GetChannels.length  * graphFixedSize;
-
+                number.lookAt(this.camera.position);
+                NumberListY.push(number);
                 gridX.add(number);
             }
-            let axisZGeo = new this.THREE.TextGeometry( "Z" ,{font : this.font,size:0.3,height:0,material:0});
-            let axisZ = new this.THREE.Mesh(axisZGeo,blackMaterial);
+            let axisZGeo = new THREE.TextGeometry( "Z" ,{font : this.font,size:0.3,height:0,material:0});
+            let axisZ = new THREE.Mesh(axisZGeo,blackMaterial);
             axisZ.position.y = graphFixedSize + 1;
+            NumberListZ.push(axisZ);
             gridX.add(axisZ);
 
             //text
@@ -298,10 +337,20 @@ class GraphRenderer {
             this.OneGraph = gridX;
 
             this.scene.add(gridX);
-        }
-        let surfaceGraph : SurfaceGraph = new SurfaceGraph();
 
-        return surfaceGraph;
+            let surfaceGraph : SurfaceGraph = new SurfaceGraph();
+
+            surfaceGraph.SetScaleObjectX(gridX);
+            surfaceGraph.SetAxisLabelsX(NumberListX);
+            surfaceGraph.SetScaleObjectY(gridY);
+            surfaceGraph.SetAxisLabelsY(NumberListY);
+            surfaceGraph.SetScaleObjectZ(gridZ);
+            surfaceGraph.SetAxisLabelsZ(NumberListZ);
+            return surfaceGraph;
+        }else{
+            //something!
+            return null;
+        }
     }
     public  CreateBarGraphFromDataSet(dataSet : DataSet) : Graph{
         if(dataSet.GetGraph != null){
@@ -315,17 +364,17 @@ class GraphRenderer {
             let graphScalingFactor = 0.5;
             let textOffset = 0.1;
 
-            let blackMaterial = new this.THREE.MeshLambertMaterial({color:0x000000});
-            let RedMaterial = new this.THREE.MeshLambertMaterial({color:0xff0000});
+            let blackMaterial = new THREE.MeshLambertMaterial({color:0x000000});
+            let RedMaterial = new THREE.MeshLambertMaterial({color:0xff0000});
 
 
-            let NameTextgeometry = new this.THREE.TextGeometry(dataSet.GetName,{font : this.font,size:0.5,height:0.1,material:0});
-            let NameTextmesh = new this.THREE.Mesh(NameTextgeometry,blackMaterial);
+            let NameTextgeometry = new THREE.TextGeometry(dataSet.GetName,{font : this.font,size:0.5,height:0.1,material:0});
+            let NameTextmesh = new THREE.Mesh(NameTextgeometry,blackMaterial);
 
             //text
             for( let textChannelNameIter = 0; textChannelNameIter < dataSet.GetAxis[0].GetChannels.length; textChannelNameIter++){
-                let channelNameGeo = new this.THREE.TextGeometry(dataSet.GetAxis[0].GetChannels[textChannelNameIter].GetName,{font : this.font,size:0.5,height:0.1,material:0});
-                let channelNameMesh = new this.THREE.Mesh(channelNameGeo,blackMaterial);
+                let channelNameGeo = new THREE.TextGeometry(dataSet.GetAxis[0].GetChannels[textChannelNameIter].GetName,{font : this.font,size:0.5,height:0.1,material:0});
+                let channelNameMesh = new THREE.Mesh(channelNameGeo,blackMaterial);
 
                 channelNameMesh.rotation.z = -Math.PI / 2;
                 channelNameMesh.position.x = textChannelNameIter * barDistanceX;
@@ -336,11 +385,11 @@ class GraphRenderer {
             }
 
             for (let barAxisIter = 0;barAxisIter < dataSet.GetAxis.length;barAxisIter++ ){
-                let randoMaterial = new this.THREE.MeshLambertMaterial({color:Math.random()*0xffffff});
+                let randoMaterial = new THREE.MeshLambertMaterial({color:Math.random()*0xffffff});
                 for(let barChannelIter = 0;barChannelIter <dataSet.GetAxis[barAxisIter].GetChannels.length;barChannelIter++){
                     let value = dataSet.GetAxis[barAxisIter].GetChannels[barChannelIter].GetPoint.GetValue()[0] * dataScalingFactor;
-                    let cubegeo = new this.THREE.BoxGeometry( 1, value , 1 );
-                    let cube = new this.THREE.Mesh( cubegeo, randoMaterial );
+                    let cubegeo = new THREE.BoxGeometry( 1, value , 1 );
+                    let cube = new THREE.Mesh( cubegeo, randoMaterial );
                     cube.castShadow = true;
                     cube.position.x = barChannelIter * barDistanceX;
                     cube.position.z = -barDistanceZ - barAxisIter;
@@ -362,6 +411,14 @@ class GraphRenderer {
 
         return barGraph;
     }
+
+    public UpdateLookAtCameraObjects(objects : DataSet[]) {
+        for (let i =0;i<objects.length;i++){
+            for (let n = 0; n<objects[i].GetGraph.GetObjectsToFaceCamera().length;n++){
+                objects[i].GetGraph.GetObjectsToFaceCamera()[n].lookAt(this.camera.position);
+            }
+        }
+    }
 }
 
 
@@ -380,8 +437,32 @@ class InputManager{
     constructor (owner : Grapher){
         this.owner=owner;
         document.getElementById('input_file').addEventListener('change', getFile)
-
     }
+    public ScaleGraphX(value : number){
+        let dataSet = this.owner.GetSelectedDataSet();
+        if(dataSet != null){
+            if(dataSet.GetGraph != null){
+                dataSet.GetGraph.SetScaleX(value);
+            }
+        }
+    }
+    public ScaleGraphY(value : number){
+        let dataSet = this.owner.GetSelectedDataSet();
+        if(dataSet != null){
+            if(dataSet.GetGraph != null){
+                dataSet.GetGraph.SetScaleY(value);
+            }
+        }
+    }
+    public ScaleGraphZ(value : number){
+        let dataSet = this.owner.GetSelectedDataSet();
+        if(dataSet != null){
+            if(dataSet.GetGraph != null){
+                dataSet.GetGraph.SetScaleZ(value);
+            }
+        }
+    }
+
     //when any file is uploaded this is called by the async file upload button
     //it then searches for the inputs given and then passes them to the grapher
     public MakeNewDataSetFromFile(rawInput : string,name:string ,format:string) {
@@ -431,6 +512,37 @@ let grapher = new Grapher();
 let inputManager = grapher.GetInputManager();
 
 
+const animate = function () {
+    requestAnimationFrame( animate );
+
+    //cube.rotation.x += 0.12;
+    //cube.rotation.y += 0.01;
+
+    grapher.GetGraphRenderer().UpdateLookAtCameraObjects(grapher.GetDataSets());
+
+    grapher.GetGraphRenderer().GetControls().update();
+    grapher.GetGraphRenderer().GetRenderer().render( grapher.GetGraphRenderer().GetScene(), grapher.GetGraphRenderer().GetCamera());
+};
+
+animate();
+
+
+
+let Xslider = document.getElementById("x_scale_input");
+Xslider.oninput = function () {
+    // @ts-ignore
+    inputManager.ScaleGraphX(this.value);
+}
+let Yslider = document.getElementById("y_scale_input");
+Yslider.oninput = function () {
+    // @ts-ignore
+    inputManager.ScaleGraphY(this.value);
+}
+let Zslider = document.getElementById("z_scale_input");
+Zslider.oninput = function () {
+    // @ts-ignore
+    inputManager.ScaleGraphZ(this.value);
+}
 
 
 /*

@@ -90,19 +90,100 @@ export class DataSet {
 //////////////////////////////////////////////
 /*visual graph classes*/
 export interface Graph {
-    GetTHREEGraph : ()=>any;
+    //SetScaleObjectX : ()=>typeof THREE.Object3D;
+    SetScaleObjectX:(typeof THREE.Object3D);
+    SetScaleObjectY:(typeof THREE.Object3D);
+    SetScaleObjectZ:(typeof THREE.Object3D);
+    SetAxisLabelsX(numbers :typeof THREE.Object3D[]):void;
+    SetAxisLabelsY(numbers :typeof THREE.Object3D[]):void;
+    SetAxisLabelsZ(numbers :typeof THREE.Object3D[]):void;
+    SetScaleX(num:number):void;
+    SetScaleY(num:number):void;
+    SetScaleZ(num:number):void;
+    GetObjectsToFaceCamera():typeof THREE.Object3D[];
 }
 
 export class BarGraph implements Graph{
 
-    public GetTHREEGraph () {
+    SetScaleObjectX: any;
+    SetScaleObjectY: any;
+    SetScaleObjectZ: any;
 
-        return 1;
+    SetScaleX(num: number): void {
     }
+
+    SetScaleY(num: number): void {
+    }
+
+    SetScaleZ(num: number): void {
+    }
+
+    GetObjectsToFaceCamera(): typeof THREE.Object3D[] {
+        return [];
+    }
+
+    SetAxisLabelsX(numbers: typeof THREE.Object3D[]): void {
+    }
+
+    SetAxisLabelsY(numbers: typeof THREE.Object3D[]): void {
+    }
+
+    SetAxisLabelsZ(numbers: typeof THREE.Object3D[]): void {
+    }
+
 }
 
 export class SurfaceGraph implements Graph{
-    public GetTHREEGraph(){
-        return 1;
+    private ScaleObjectX : typeof THREE.Object3D;
+    private ScaleObjectY : typeof THREE.Object3D;
+    private ScaleObjectZ : typeof THREE.Object3D;
+
+    private AxisLabelsX : typeof THREE.Object3D[];
+    private AxisLabelsY : typeof THREE.Object3D[];
+    private AxisLabelsZ : typeof THREE.Object3D[];
+
+    public SetScaleObjectX(obj : typeof THREE.Object3D){
+        this.ScaleObjectX = obj;
     }
+    public SetScaleObjectY(obj : typeof THREE.Object3D){
+        this.ScaleObjectY = obj;
+    }
+    public SetScaleObjectZ(obj : typeof THREE.Object3D){
+        this.ScaleObjectZ = obj;
+    }
+    public SetScaleX(num:number){
+        /*for (let i =0;i<this.AxisLabelsX.length; i++) {
+            this.AxisLabelsX[i].scale.x = 1/(num/50);
+        }*/
+        this.ScaleObjectX.scale.x = num/50;
+    }
+    public SetScaleY(num:number){
+        this.ScaleObjectX.scale.z = num/50;
+    }
+    public SetScaleZ(num:number){
+        this.ScaleObjectX.scale.y = num/50;
+    }
+
+    public SetAxisLabelsX(NumberListX: typeof THREE.Object3D[]) {
+        this.AxisLabelsX = NumberListX;
+    }
+
+    SetAxisLabelsY(NumberListY: typeof THREE.Object3D[]) {
+        this.AxisLabelsY = NumberListY;
+
+    }
+
+    SetAxisLabelsZ(NumberListZ: typeof THREE.Object3D[]) {
+        this.AxisLabelsZ = NumberListZ;
+
+    }
+    public GetObjectsToFaceCamera(){
+        let set : typeof THREE.Object3D[] = [];
+        set = set.concat(this.AxisLabelsX);
+        set = set.concat(this.AxisLabelsY);
+        set = set.concat(this.AxisLabelsZ);
+        return set;
+    }
+
+
 }
