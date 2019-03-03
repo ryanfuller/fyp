@@ -2,10 +2,13 @@ const THREE = require('three');
 /*
 * class structures for data sets for use with making graphs with
 * */
-//acts as an array for all dimensions that may be on a point. 1 means its a single scaler. 3 is a tripple point
+
+/**
+ * acts as an array for all dimensions that may be on a point. 1 means its a single scaler. 3 is a tripple point
+ * a point reperesents a single plot point on any graph type
+ */
 export class Point {
     constructor(private origonalValue: number[]){
-
     }
     public GetValue(): number[]{
         return this.origonalValue;
@@ -13,10 +16,14 @@ export class Point {
 }
 
 
-
+/**
+ * reperesents a vertical slice of any graph that occupies 1 point.
+ * holds 1 point and only 1 point
+ */
 export class DataSetChannel{
     private name: string;
     private point: Point;
+    //name is cosmetic
     constructor(name:string,point:Point) {
         this.name = name;
         this.point = point;
@@ -30,11 +37,16 @@ export class DataSetChannel{
     }
 }
 
+/**
+ * reperesents a single strait plot of data along the x axis. if you want more than 1 line you need multiple axis
+ * holds many channels
+ */
 export class DataSetAxis {
 
     private name: string;
     private channels : Array<DataSetChannel> = new Array<DataSetChannel>();
 
+    //passed array of channels, name is purely cosmetic and can be used in labels
     constructor(name:string, channels: Array<DataSetChannel>) {
         this.name = name;
         this.channels = channels;
@@ -47,6 +59,11 @@ export class DataSetAxis {
     }
 }
 
+/**
+ * datasets hold many axis
+ * reperesents a whole graph
+ * can contain 1 reperesentation of a visual graph
+ */
 export class DataSet {
     private name: string;
     private dataAxis:Array<DataSetAxis> = new Array<DataSetAxis>();
@@ -55,6 +72,7 @@ export class DataSet {
     private rangeY : number[] = [0,0];
     private rangeZ : number[] = [0,0];
 
+    //pass in name of the graph and then the axis that it uses as well as the maximum ranges of all the values
     constructor(name : string,dataAxis:Array<DataSetAxis>,rangeX : number[],rangeY : number[],rangeZ : number[]) {
         this.name = name;
         this.dataAxis = dataAxis;
@@ -88,21 +106,29 @@ export class DataSet {
 }
 
 //////////////////////////////////////////////
-/*visual graph classes*/
+/*visual graph classes
+* used as classes to create and control graphical reperesentations of the data
+* */
+
+/**
+ * any new graph graphic needs to inherit from Graph in order to be draw correctly
+ */
 export interface Graph {
     //SetScaleObjectX : ()=>typeof THREE.Object3D;
-    SetScaleObjectX:(typeof THREE.Object3D);
+    SetScaleObjectX:(typeof THREE.Object3D);//the object that when scaled will make the graph bigger in the x
     SetScaleObjectY:(typeof THREE.Object3D);
     SetScaleObjectZ:(typeof THREE.Object3D);
-    SetAxisLabelsX(numbers :typeof THREE.Object3D[]):void;
+    SetAxisLabelsX(numbers :typeof THREE.Object3D[]):void;//the labels for the x axis so that they can be pointed in the right direction
     SetAxisLabelsY(numbers :typeof THREE.Object3D[]):void;
     SetAxisLabelsZ(numbers :typeof THREE.Object3D[]):void;
-    SetScaleX(num:number):void;
+    SetScaleX(num:number):void;//function to scale the graph on the x axis
     SetScaleY(num:number):void;
     SetScaleZ(num:number):void;
-    GetObjectsToFaceCamera():typeof THREE.Object3D[];
+    GetObjectsToFaceCamera():typeof THREE.Object3D[];//get all labels on the graph
 }
-
+/**
+ * bar graph class reperesentation
+ * */
 export class BarGraph implements Graph{
 
     SetScaleObjectX: any;
@@ -133,6 +159,9 @@ export class BarGraph implements Graph{
 
 }
 
+/**
+ * surface graph reperesentation
+ */
 export class SurfaceGraph implements Graph{
     private ScaleObjectX : typeof THREE.Object3D;
     private ScaleObjectY : typeof THREE.Object3D;

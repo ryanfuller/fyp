@@ -5,13 +5,10 @@
 
 import {DataSet, Graph, BarGraph, SurfaceGraph} from "./DataSetClasses";
 import {DataSetFactory} from "./DataSetFactory";
-import {type} from "os";
 const THREE = require('three');
-/*
+/**
 * main parent class that controls everything
 * */
-
-
 class Grapher {
     private inputManager = new InputManager(this);
     private dataSetFactory = new DataSetFactory();
@@ -104,7 +101,10 @@ class GraphRenderer {
         return this.controls;
     }
 
-
+    /**
+     * initialises all the objects and scene needed for the graphs to be drawn on
+     * scene setup and vital three objects setup here
+     */
     constructor(){
         let displayWidthRatio = 0.8;
         let displayWidth = window.innerWidth * displayWidthRatio;
@@ -193,19 +193,25 @@ class GraphRenderer {
         }
     }
 
+    /**
+     * creates the surface graph graphics from the dataset given
+     * adds it to the scene and then renders it and passes back the surface graph data
+     * @param dataSet - dataset in surface format with triplet values
+     * @return surfaceGraph - surface graph object
+     * @constructor
+     */
     public CreateSurfaceGraphFromDataSet(dataSet:DataSet):Graph{
-        if(dataSet.GetGraph != null){
-            this.scene.remove(this.OneGraph);
+        if(dataSet.GetGraph != null){//temporary only allows 1 graph to exist atm
+            this.scene.remove(this.OneGraph);//this removes it if there already is a graph
         }
 
         if (dataSet.GetGraph == null && dataSet.GetAxis.length > 0 ){
-            let graphFixedSize = 6;
-            let graphScalingFactor = 0.5;
-            let axisScalingFactorX = graphFixedSize/(dataSet.GetRangeX[1] - dataSet.GetRangeX[0]) ;
+            let graphFixedSize = 6;//the scale of the graph in world units and what it fits the data into
+            let axisScalingFactorX = graphFixedSize/(dataSet.GetRangeX[1] - dataSet.GetRangeX[0]) ;//based on max values these are
             let axisScalingFactorY = graphFixedSize/(dataSet.GetRangeY[1] - dataSet.GetRangeY[0]) ;
             let axisScalingFactorZ = graphFixedSize/(dataSet.GetRangeZ[1] - dataSet.GetRangeZ[0]) ;
 
-
+            //setup materials, wireframe draws the lines on the surface
             let wireMaterial = new THREE.LineBasicMaterial( { color: 0xffffff, linewidth: 2 } );
             let blackMaterial = new THREE.MeshLambertMaterial({color:0x000000});
             let redMaterial = new THREE.MeshLambertMaterial({color:0xff0000});
@@ -217,7 +223,7 @@ class GraphRenderer {
             let NameTextmesh = new THREE.Mesh(NameTextgeometry,blackMaterial);
             NameTextmesh.position.y = graphFixedSize + 1;
 
-            //grids
+            //grids setup and positioned for plotting visability
             let size = 20;
             let divisions = 20;
 
@@ -230,7 +236,7 @@ class GraphRenderer {
             gridX.add(gridY);
             gridY.add(gridZ);
 
-
+            //graph mesh loops through the points and makes a new mesh for the data
             let geo = new THREE.Geometry();
 
 
@@ -248,7 +254,7 @@ class GraphRenderer {
             let totalPoints = dataSet.GetAxis.length * width;
             let normal =  new THREE.Vector3( 0, 1, 0 );
 
-
+            //draws faces on all the points in order
             //squares for bottom right triangles
             for (let i=0;i<totalPoints - width -1;i++){
                 if(i%width != width-1 || i == 0){
@@ -265,7 +271,7 @@ class GraphRenderer {
 
             let mesh = new THREE.Mesh( geo, randMaterial );
 
-
+            //labels and scales
             let geoEdge = new THREE.EdgesGeometry(mesh.geometry);
             let generatedmesh = new THREE.LineSegments(geoEdge,wireMaterial);
             generatedmesh.add(mesh);
@@ -352,17 +358,25 @@ class GraphRenderer {
             return null;
         }
     }
+
+    /**
+     * creates the bargraph graphics from the dataset given
+     * adds it to the scene and then renders it and passes back the bargraph data
+     * @param dataSet - dataset in bargraph format with single values
+     * @return barGraph - barGraph Graph object
+     * @constructor
+     */
     public  CreateBarGraphFromDataSet(dataSet : DataSet) : Graph{
-        if(dataSet.GetGraph != null){
-            this.scene.remove(this.OneGraph);
+        if(dataSet.GetGraph != null){//temporary only allows 1 graph to exist atm
+            this.scene.remove(this.OneGraph);//this removes it if there already is a graph
         }
 
         if (dataSet.GetGraph == null && dataSet.GetAxis.length > 0 ){
-            let barDistanceZ = 1;
-            let barDistanceX = 1;
-            let dataScalingFactor = 0.5;
-            let graphScalingFactor = 0.5;
-            let textOffset = 0.1;
+            let barDistanceZ = 1;//size of the bars depth
+            let barDistanceX = 1;//size of the bars width
+            let dataScalingFactor = 0.5;//data scaling for each value
+            let graphScalingFactor = 0.5;//graph as a whole scaled down
+            let textOffset = 0.1;//text distance away from the graph
 
             let blackMaterial = new THREE.MeshLambertMaterial({color:0x000000});
             let RedMaterial = new THREE.MeshLambertMaterial({color:0xff0000});
@@ -371,7 +385,7 @@ class GraphRenderer {
             let NameTextgeometry = new THREE.TextGeometry(dataSet.GetName,{font : this.font,size:0.5,height:0.1,material:0});
             let NameTextmesh = new THREE.Mesh(NameTextgeometry,blackMaterial);
 
-            //text
+            //text creation
             for( let textChannelNameIter = 0; textChannelNameIter < dataSet.GetAxis[0].GetChannels.length; textChannelNameIter++){
                 let channelNameGeo = new THREE.TextGeometry(dataSet.GetAxis[0].GetChannels[textChannelNameIter].GetName,{font : this.font,size:0.5,height:0.1,material:0});
                 let channelNameMesh = new THREE.Mesh(channelNameGeo,blackMaterial);
@@ -384,6 +398,7 @@ class GraphRenderer {
                 NameTextmesh.add(channelNameMesh);
             }
 
+            //create a cube for each channel in all axis stored in the dataset
             for (let barAxisIter = 0;barAxisIter < dataSet.GetAxis.length;barAxisIter++ ){
                 let randoMaterial = new THREE.MeshLambertMaterial({color:Math.random()*0xffffff});
                 for(let barChannelIter = 0;barChannelIter <dataSet.GetAxis[barAxisIter].GetChannels.length;barChannelIter++){
@@ -398,12 +413,12 @@ class GraphRenderer {
                 }
             }
 
-
+            //name mesh is the parent for all the objects in the graph
             NameTextmesh.scale.set(graphScalingFactor,graphScalingFactor,graphScalingFactor);
             NameTextmesh.position.x = -dataSet.GetAxis[0].GetChannels.length/2 * graphScalingFactor;
 
             this.scene.remove(this.OneGraph);
-            this.OneGraph = NameTextmesh;
+            this.OneGraph = NameTextmesh;//temporary
 
             this.scene.add(NameTextmesh);
         }
@@ -412,6 +427,11 @@ class GraphRenderer {
         return barGraph;
     }
 
+    /**
+     * requests an array of datasets and then sets each of the available labels to look at the camera
+     * @param objects - dataset array
+     * @constructor
+     */
     public UpdateLookAtCameraObjects(objects : DataSet[]) {
         for (let i =0;i<objects.length;i++){
             for (let n = 0; n<objects[i].GetGraph.GetObjectsToFaceCamera().length;n++){
@@ -426,18 +446,31 @@ class GraphRenderer {
 
 
 
-/*
+/**
 * manages the input given to it by the ui and then communicates functions accordingly
+ * only parses signals and does not perform functions on them
 * */
 class InputManager{
     owner : Grapher;
+    //html elements ids
     PlotTypeId = "plot_type";
     SeperationTypeId = "seperation_type";
     TextTypeId = "text_type";
+
+    /**
+     * must be initialised with a main grapher to control it and to send inputs to
+     * @param owner
+     */
     constructor (owner : Grapher){
         this.owner=owner;
         document.getElementById('input_file').addEventListener('change', getFile)
     }
+
+    /**
+     * takes in a 0 to 100 value from the sliders for scale
+     * @param value - number ranging from 0 to 100
+     * @constructor
+     */
     public ScaleGraphX(value : number){
         let dataSet = this.owner.GetSelectedDataSet();
         if(dataSet != null){
@@ -463,8 +496,15 @@ class InputManager{
         }
     }
 
-    //when any file is uploaded this is called by the async file upload button
-    //it then searches for the inputs given and then passes them to the grapher
+
+    /**
+     * when any file is uploaded this is called by the async file upload button
+     * it then searches for the inputs given and then passes them to the grapher
+     * @param rawInput - file data
+     * @param name - file name
+     * @param format - format of the file (only csv accepted so far)
+     * @constructor
+     */
     public MakeNewDataSetFromFile(rawInput : string,name:string ,format:string) {
 
         let plotTypeElement = <HTMLSelectElement>document.getElementById(this.PlotTypeId);//done every time to guarentee its loaded
@@ -502,21 +542,22 @@ class InputManager{
                 textChar = "";
             }
         }
-
+        //passes signals to a create data request
         this.owner.CreateDataSetRequest(rawInput,name,format,plotType,seperationChar,textChar);
     }
 }
 
-
+//initialise grapher and input manager
 let grapher = new Grapher();
 let inputManager = grapher.GetInputManager();
 
-
+/**
+ * the animate function that updates every frame
+ * only vital things can go in here like rendering the scene and updating camera controls
+ */
 const animate = function () {
     requestAnimationFrame( animate );
 
-    //cube.rotation.x += 0.12;
-    //cube.rotation.y += 0.01;
 
     grapher.GetGraphRenderer().UpdateLookAtCameraObjects(grapher.GetDataSets());
 
@@ -527,7 +568,9 @@ const animate = function () {
 animate();
 
 
-
+/**
+ * sliders for the ui
+ */
 let Xslider = document.getElementById("x_scale_input");
 Xslider.oninput = function () {
     // @ts-ignore
@@ -545,7 +588,7 @@ Zslider.oninput = function () {
 }
 
 
-/*
+/**
 * function passed to html elements to call when a file is passed to it
 * */
 function getFile(event:any) {
@@ -555,7 +598,7 @@ function getFile(event:any) {
 
     }
 }
-/*
+/**
 * takes the blob file and creates a data set from it.
 * files are assumed to have a .extension and splits it based off of file name.
 * */
@@ -567,7 +610,7 @@ function placeFileContent(target: any, file: any) {
     readFileContent(file).then(content => {inputManager.MakeNewDataSetFromFile(content,name,format);target.value = content}).catch(error => console.log(error));
 }
 
-/*
+/**
 * reads the file as a promise and returns the result when it is complete
 * if it cant it throws an error log
 * */
