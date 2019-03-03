@@ -65,8 +65,6 @@ class Grapher {
             alert("the data supplied was not formatted correctly, please check your file and retry");
         }
     }
-
-
 }
 
 class GraphRenderer {
@@ -352,6 +350,7 @@ class GraphRenderer {
             surfaceGraph.SetAxisLabelsY(NumberListY);
             surfaceGraph.SetScaleObjectZ(gridZ);
             surfaceGraph.SetAxisLabelsZ(NumberListZ);
+            surfaceGraph.SetTitleObject(NameTextmesh);
             return surfaceGraph;
         }else{
             //something!
@@ -439,6 +438,7 @@ class GraphRenderer {
             }
         }
     }
+
 }
 
 
@@ -496,6 +496,14 @@ class InputManager{
         }
     }
 
+    ChangeGraphTitleLabel(value: string) {
+        let dataSet = this.owner.GetSelectedDataSet();
+        if(dataSet != null){
+            if(dataSet.GetGraph!=null){
+                dataSet.GetGraph.SetTitleText(value);
+            }
+        }
+    }
 
     /**
      * when any file is uploaded this is called by the async file upload button
@@ -545,6 +553,8 @@ class InputManager{
         //passes signals to a create data request
         this.owner.CreateDataSetRequest(rawInput,name,format,plotType,seperationChar,textChar);
     }
+
+
 }
 
 //initialise grapher and input manager
@@ -586,6 +596,16 @@ Zslider.oninput = function () {
     // @ts-ignore
     inputManager.ScaleGraphZ(this.value);
 }
+
+/**
+ * title label for the ui
+ */
+let titleInput = document.getElementById("title_label");
+titleInput.oninput = function () {
+    // @ts-ignore
+    inputManager.ChangeGraphTitleLabel(this.value);
+}
+
 
 
 /**

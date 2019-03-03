@@ -125,6 +125,8 @@ export interface Graph {
     SetScaleY(num:number):void;
     SetScaleZ(num:number):void;
     GetObjectsToFaceCamera():typeof THREE.Object3D[];//get all labels on the graph
+    SetTitleText(title: string): void;
+    SetTitleObject:(typeof THREE.Object3D);
 }
 /**
  * bar graph class reperesentation
@@ -157,6 +159,11 @@ export class BarGraph implements Graph{
     SetAxisLabelsZ(numbers: typeof THREE.Object3D[]): void {
     }
 
+    SetTitleObject: any;
+
+    SetTitleText(title: string): void {
+    }
+
 }
 
 /**
@@ -166,10 +173,15 @@ export class SurfaceGraph implements Graph{
     private ScaleObjectX : typeof THREE.Object3D;
     private ScaleObjectY : typeof THREE.Object3D;
     private ScaleObjectZ : typeof THREE.Object3D;
+    private TitleLabelObject : typeof THREE.Object3D;
 
     private AxisLabelsX : typeof THREE.Object3D[];
     private AxisLabelsY : typeof THREE.Object3D[];
     private AxisLabelsZ : typeof THREE.Object3D[];
+    private fontJSON = require("./helvetiker_regular.typeface.json");
+    private loader = new THREE.FontLoader();
+
+    private font = this.loader.parse(this.fontJSON);
 
     public SetScaleObjectX(obj : typeof THREE.Object3D){
         this.ScaleObjectX = obj;
@@ -197,12 +209,12 @@ export class SurfaceGraph implements Graph{
         this.AxisLabelsX = NumberListX;
     }
 
-    SetAxisLabelsY(NumberListY: typeof THREE.Object3D[]) {
+    public SetAxisLabelsY(NumberListY: typeof THREE.Object3D[]) {
         this.AxisLabelsY = NumberListY;
 
     }
 
-    SetAxisLabelsZ(NumberListZ: typeof THREE.Object3D[]) {
+    public SetAxisLabelsZ(NumberListZ: typeof THREE.Object3D[]) {
         this.AxisLabelsZ = NumberListZ;
 
     }
@@ -214,5 +226,13 @@ export class SurfaceGraph implements Graph{
         return set;
     }
 
+    SetTitleText(title: string): void {
 
+        let NameTextgeometry = new THREE.TextGeometry(title,{font : this.font,size:0.5,height:0,material:0});
+        this.TitleLabelObject.geometry = NameTextgeometry;
+    }
+
+    public SetTitleObject(obj : typeof THREE.Object3D){
+        this.TitleLabelObject = obj;
+    }
 }
