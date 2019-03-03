@@ -351,6 +351,7 @@ class GraphRenderer {
             surfaceGraph.SetScaleObjectZ(gridZ);
             surfaceGraph.SetAxisLabelsZ(NumberListZ);
             surfaceGraph.SetTitleObject(NameTextmesh);
+            surfaceGraph.SetMeshObject(mesh);
             return surfaceGraph;
         }else{
             //something!
@@ -504,6 +505,14 @@ class InputManager{
             }
         }
     }
+    ChangeGraphColour(value: any) {
+        let dataSet = this.owner.GetSelectedDataSet();
+        if(dataSet != null){
+            if(dataSet.GetGraph!=null){
+                dataSet.GetGraph.SetColour(value);
+            }
+        }
+    }
 
     /**
      * when any file is uploaded this is called by the async file upload button
@@ -553,6 +562,7 @@ class InputManager{
         //passes signals to a create data request
         this.owner.CreateDataSetRequest(rawInput,name,format,plotType,seperationChar,textChar);
     }
+
 
 
 }
@@ -605,6 +615,15 @@ titleInput.oninput = function () {
     // @ts-ignore
     inputManager.ChangeGraphTitleLabel(this.value);
 }
+/**
+ * colour label for the ui
+ */
+let colourInput = document.getElementById("colour_input");
+colourInput.oninput = function () {
+    // @ts-ignore
+    inputManager.ChangeGraphColour(this.value);
+}
+
 
 
 

@@ -127,6 +127,9 @@ export interface Graph {
     GetObjectsToFaceCamera():typeof THREE.Object3D[];//get all labels on the graph
     SetTitleText(title: string): void;
     SetTitleObject:(typeof THREE.Object3D);
+    SetColour(colour: string): void;
+    SetMeshObject:(typeof THREE.Object3D);//get the main mesh for the graph
+
 }
 /**
  * bar graph class reperesentation
@@ -164,6 +167,11 @@ export class BarGraph implements Graph{
     SetTitleText(title: string): void {
     }
 
+    SetMeshObject: any;
+
+    SetColour(colour: string): void {
+    }
+
 }
 
 /**
@@ -174,6 +182,7 @@ export class SurfaceGraph implements Graph{
     private ScaleObjectY : typeof THREE.Object3D;
     private ScaleObjectZ : typeof THREE.Object3D;
     private TitleLabelObject : typeof THREE.Object3D;
+    private MeshObject : typeof THREE.Object3D;
 
     private AxisLabelsX : typeof THREE.Object3D[];
     private AxisLabelsY : typeof THREE.Object3D[];
@@ -234,5 +243,15 @@ export class SurfaceGraph implements Graph{
 
     public SetTitleObject(obj : typeof THREE.Object3D){
         this.TitleLabelObject = obj;
+    }
+
+    public SetMeshObject(obj : typeof THREE.Object3D){
+        this.MeshObject = obj;
+    }
+
+    SetColour(colour: string): void {
+        let mat = new THREE.MeshLambertMaterial({color:colour});
+        mat.side = THREE.DoubleSide;
+        this.MeshObject.material = mat;
     }
 }
