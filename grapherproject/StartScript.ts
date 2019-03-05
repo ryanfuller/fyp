@@ -352,6 +352,8 @@ class GraphRenderer {
             surfaceGraph.SetAxisLabelsZ(NumberListZ);
             surfaceGraph.SetTitleObject(NameTextmesh);
             surfaceGraph.SetMeshObject(mesh);
+            surfaceGraph.SetGridObjects([gridX,gridY,gridZ]);
+
             return surfaceGraph;
         }else{
             //something!
@@ -505,7 +507,7 @@ class InputManager{
             }
         }
     }
-    ChangeGraphColour(value: any) {
+    ChangeGraphColour(value: string) {
         let dataSet = this.owner.GetSelectedDataSet();
         if(dataSet != null){
             if(dataSet.GetGraph!=null){
@@ -514,6 +516,23 @@ class InputManager{
         }
     }
 
+    ToggleGrid(checked: boolean) {
+        let dataSet = this.owner.GetSelectedDataSet();
+        if(dataSet != null){
+            if(dataSet.GetGraph!=null){
+                dataSet.GetGraph.SetGridVisable(checked);
+            }
+        }
+    }
+
+    ToggleNumbers(checked: boolean) {
+        let dataSet = this.owner.GetSelectedDataSet();
+        if(dataSet != null){
+            if(dataSet.GetGraph!=null){
+                dataSet.GetGraph.SetNumbersVisable(checked);
+            }
+        }
+    }
     /**
      * when any file is uploaded this is called by the async file upload button
      * it then searches for the inputs given and then passes them to the grapher
@@ -622,6 +641,22 @@ let colourInput = document.getElementById("colour_input");
 colourInput.oninput = function () {
     // @ts-ignore
     inputManager.ChangeGraphColour(this.value);
+}
+/**
+ * Toggle Grid for the graph
+ */
+let toggleGridInput = document.getElementById("toggle_grid");
+toggleGridInput.onclick = function () {
+    // @ts-ignore
+    inputManager.ToggleGrid(this.checked);
+}
+/**
+ * Toggle Numbers for the graph
+ */
+let toggleNumbersInput = document.getElementById("toggle_numbers");
+toggleNumbersInput.onclick = function () {
+    // @ts-ignore
+    inputManager.ToggleNumbers(this.checked);
 }
 
 

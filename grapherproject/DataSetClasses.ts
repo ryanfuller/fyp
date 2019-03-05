@@ -129,7 +129,9 @@ export interface Graph {
     SetTitleObject:(typeof THREE.Object3D);
     SetColour(colour: string): void;
     SetMeshObject:(typeof THREE.Object3D);//get the main mesh for the graph
-
+    SetGridObjects(objs : typeof THREE.Object3D[]):void;
+    SetGridVisable(checked: boolean): void;
+    SetNumbersVisable(checked: boolean): void;
 }
 /**
  * bar graph class reperesentation
@@ -172,6 +174,16 @@ export class BarGraph implements Graph{
     SetColour(colour: string): void {
     }
 
+    SetGridVisable(checked: boolean): void {
+    }
+
+    SetNumbersVisable(checked: boolean): void {
+    }
+
+    SetGridObjects(objs: typeof THREE.Object3D[]): void {
+    }
+
+
 }
 
 /**
@@ -187,6 +199,8 @@ export class SurfaceGraph implements Graph{
     private AxisLabelsX : typeof THREE.Object3D[];
     private AxisLabelsY : typeof THREE.Object3D[];
     private AxisLabelsZ : typeof THREE.Object3D[];
+    private GridObjects : typeof THREE.Object3D[];
+    private GridMaterial : typeof THREE.Material;
     private fontJSON = require("./helvetiker_regular.typeface.json");
     private loader = new THREE.FontLoader();
 
@@ -253,5 +267,27 @@ export class SurfaceGraph implements Graph{
         let mat = new THREE.MeshLambertMaterial({color:colour});
         mat.side = THREE.DoubleSide;
         this.MeshObject.material = mat;
+    }
+
+    public SetGridObjects(objs : typeof THREE.Object3D[]){
+        this.GridMaterial = objs[0].material;
+        this.GridObjects = objs;
+    }
+    SetGridVisable(checked: boolean): void {
+        for(let i = 0; i<this.GridObjects.length;i++){
+            this.GridObjects[i].material = checked ? this.GridMaterial:new THREE.MeshStandardMaterial({opacity:0,transparent:true}) ;
+        }
+    }
+
+    SetNumbersVisable(checked: boolean): void {
+        for(let i = 0; i<this.AxisLabelsX.length;i++){
+            this.AxisLabelsX[i].visible = checked;
+        }
+        for(let i = 0; i<this.AxisLabelsY.length;i++){
+            this.AxisLabelsY[i].visible = checked;
+        }
+        for(let i = 0; i<this.AxisLabelsZ.length;i++){
+            this.AxisLabelsZ[i].visible = checked;
+        }
     }
 }
