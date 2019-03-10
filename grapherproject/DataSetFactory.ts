@@ -21,9 +21,10 @@ export class DataSetFactory{
      * @param plotType - the kind of plot that was supplied either bar or surface
      * @param seperationChar - the character that seperates cells in the file
      * @param textChar - " if the words are surrounded by quotes
+     * @param id - the id of the graph
      * @constructor
      */
-    public CreateNewDataSet(input:string,name:string,format:string,plotType:string,seperationChar:string,textChar:string):DataSet{
+    public CreateNewDataSet(input:string,name:string,format:string,plotType:string,seperationChar:string,textChar:string,id:number):DataSet{
         this.SeperationChar = seperationChar;
         this.TextChar = textChar;
         let matrixData = this.RemoveSpaceFromCSV(input);//clean the input data to an expected format
@@ -36,11 +37,11 @@ export class DataSetFactory{
                     console.log(plotType);
                     switch (plotType) {
                         case "bar":{
-                            return this.CreateNewBarDataSetFromCSV(matrixData,name);
+                            return this.CreateNewBarDataSetFromCSV(matrixData,name,id);
                             break;
                         }
                         case "surface":{
-                            return this.CreateNewSurfaceDataSetFromCSV(matrixData,name);
+                            return this.CreateNewSurfaceDataSetFromCSV(matrixData,name,id);
                             break;
                         }
                         default:{
@@ -66,7 +67,7 @@ export class DataSetFactory{
      * @return newGraph - dataset of the new graph as a bar graph plot
      * @constructor
      */
-    private  CreateNewBarDataSetFromCSV(matrixData :string[][], name: string) : DataSet{
+    private  CreateNewBarDataSetFromCSV(matrixData :string[][], name: string,id:number) : DataSet{
         //assumes titles at the top and side
         //assumes amount of data is constant, so no column has more data than the other for no reason or if data sets > amount of sets
 
@@ -98,8 +99,7 @@ export class DataSetFactory{
             axis.push(new DataSetAxis(matrixData[0][c],channels));
 
         }
-
-        let newGraph = new DataSet(name,axis,rangeX,rangeY,[0,0]);
+        let newGraph = new DataSet(name,axis,rangeX,rangeY,[0,0],id);
 
         return newGraph;
         //tested with single csv with many different values and console.log constantly checking values
@@ -113,7 +113,7 @@ export class DataSetFactory{
      * @return newGraph - dataset of the new graph as a surface plot
      * @constructor
      */
-    private  CreateNewSurfaceDataSetFromCSV(matrixData :string[][], name: string) : DataSet{
+    private  CreateNewSurfaceDataSetFromCSV(matrixData :string[][], name: string,id : number) : DataSet{
         if(matrixData[0].length > 3){//if not in triplet format it spits it back out
             throw new Error("your data supplied is not consistent. check the columns are the same length and that you chose comma or space correctly.");
             return null;
@@ -165,7 +165,7 @@ export class DataSetFactory{
 
         }
         axis.push(new DataSetAxis("",channels));
-        let newGraph = new DataSet(name,axis,rangeX,rangeY,rangeZ);
+        let newGraph = new DataSet(name,axis,rangeX,rangeY,rangeZ,id);
         return newGraph;
         //tested with single csv with many different values and console.log constantly checking values
     }

@@ -13,7 +13,7 @@ class Grapher {
     private inputManager = new InputManager(this);
     private dataSetFactory = new DataSetFactory();
     private graphRenderer = new GraphRenderer();
-
+    private graphID = 0;
     //private graphs : Array<Graph> = new Array<Graph>();
     private dataSets : Array<DataSet> = new Array<DataSet>();
 
@@ -30,6 +30,12 @@ class Grapher {
         return this.selectedDataSet;
     }
 
+    public SetSelectedDataSet(dataSet:DataSet){
+        this.selectedDataSet = dataSet;
+        this.graphRenderer.RemoveAllGraphsFromScene(this.dataSets);
+        this.graphRenderer.DrawGraph(dataSet);
+    }
+
     public GetGraphRenderer(){
         return this.graphRenderer;
     }
@@ -39,21 +45,31 @@ class Grapher {
     public CreateDataSetRequest(input : string,name:string,format:string,plotType : string,seperationChar : string,textChar :string){
         let newDataSet;
         try{
-            newDataSet = this.dataSetFactory.CreateNewDataSet(input,name,format,plotType,seperationChar,textChar);
+            newDataSet = this.dataSetFactory.CreateNewDataSet(input,name,format,plotType,seperationChar,textChar,this.graphID);
         }catch (e) {
             alert(e.toString());
         }
+        this.graphID+=1;
         if (newDataSet != null){
-            console.log(newDataSet);
             this.dataSets.push(newDataSet);
-            this.selectedDataSet = this.dataSets[0];
+            this.selectedDataSet = newDataSet;
+            console.log("dataset v");
+            console.log(newDataSet );
+            console.log("datasets v");
             console.log(this.dataSets);
-            switch (plotType) {
+            console.log(plotType);
+            switch (plotType){
                 case "bar":{
                     newDataSet.SetGraph(this.graphRenderer.CreateBarGraphFromDataSet(newDataSet));
+                    this.inputManager.UpdateGraphList();
+                    this.graphRenderer.RemoveAllGraphsFromScene(this.dataSets);
+                    this.graphRenderer.DrawGraph(newDataSet);
                     break;
                 }case "surface":{
                     newDataSet.SetGraph(this.graphRenderer.CreateSurfaceGraphFromDataSet(newDataSet));
+                    this.inputManager.UpdateGraphList();
+                    this.graphRenderer.RemoveAllGraphsFromScene(this.dataSets);
+                    this.graphRenderer.DrawGraph(newDataSet);
                     break;
                 }
                 default : {
@@ -83,8 +99,6 @@ class GraphRenderer {
     private loader = new THREE.FontLoader();
 
     private font = this.loader.parse(this.fontJSON);
-
-    private OneGraph : any;
 
     public GetCamera(){
         return this.camera;
@@ -199,9 +213,7 @@ class GraphRenderer {
      * @constructor
      */
     public CreateSurfaceGraphFromDataSet(dataSet:DataSet):Graph{
-        if(dataSet.GetGraph != null){//temporary only allows 1 graph to exist atm
-            this.scene.remove(this.OneGraph);//this removes it if there already is a graph
-        }
+
 
         if (dataSet.GetGraph == null && dataSet.GetAxis.length > 0 ){
             let graphFixedSize = 6;//the scale of the graph in world units and what it fits the data into
@@ -337,13 +349,11 @@ class GraphRenderer {
 
 
 
-            this.scene.remove(this.OneGraph);
-            this.OneGraph = gridX;
-
             this.scene.add(gridX);
 
             let surfaceGraph : SurfaceGraph = new SurfaceGraph();
 
+            surfaceGraph.SetDrawableObject(gridX);
             surfaceGraph.SetScaleObjectX(gridX);
             surfaceGraph.SetAxisLabelsX(NumberListX);
             surfaceGraph.SetScaleObjectY(gridY);
@@ -361,6 +371,16 @@ class GraphRenderer {
         }
     }
 
+    public RemoveAllGraphsFromScene(sets : DataSet[]){
+        for (let i =0;i<sets.length;i++){
+            this.scene.remove(sets[i].GetGraph.GetDrawableObject());
+        }
+    }
+
+    public DrawGraph(set : DataSet){
+        this.scene.add(set.GetGraph.GetDrawableObject());
+    }
+
     /**
      * creates the bargraph graphics from the dataset given
      * adds it to the scene and then renders it and passes back the bargraph data
@@ -369,10 +389,8 @@ class GraphRenderer {
      * @constructor
      */
     public  CreateBarGraphFromDataSet(dataSet : DataSet) : Graph{
-        if(dataSet.GetGraph != null){//temporary only allows 1 graph to exist atm
-            this.scene.remove(this.OneGraph);//this removes it if there already is a graph
-        }
 
+        let barGraph : BarGraph = new BarGraph();
         if (dataSet.GetGraph == null && dataSet.GetAxis.length > 0 ){
             let barDistanceZ = 1;//size of the bars depth
             let barDistanceX = 1;//size of the bars width
@@ -388,6 +406,7 @@ class GraphRenderer {
             let NameTextmesh = new THREE.Mesh(NameTextgeometry,blackMaterial);
 
             //text creation
+            let textList = new Array<typeof THREE.Object3D>();
             for( let textChannelNameIter = 0; textChannelNameIter < dataSet.GetAxis[0].GetChannels.length; textChannelNameIter++){
                 let channelNameGeo = new THREE.TextGeometry(dataSet.GetAxis[0].GetChannels[textChannelNameIter].GetName,{font : this.font,size:0.5,height:0.1,material:0});
                 let channelNameMesh = new THREE.Mesh(channelNameGeo,blackMaterial);
@@ -396,7 +415,8 @@ class GraphRenderer {
                 channelNameMesh.position.x = textChannelNameIter * barDistanceX;
                 channelNameMesh.position.z = -barDistanceZ;
                 channelNameMesh.position.y = -textOffset;
-
+                channelNameMesh.lookAt(this.camera.position);
+                textList.push(channelNameMesh);
                 NameTextmesh.add(channelNameMesh);
             }
 
@@ -419,12 +439,18 @@ class GraphRenderer {
             NameTextmesh.scale.set(graphScalingFactor,graphScalingFactor,graphScalingFactor);
             NameTextmesh.position.x = -dataSet.GetAxis[0].GetChannels.length/2 * graphScalingFactor;
 
-            this.scene.remove(this.OneGraph);
-            this.OneGraph = NameTextmesh;//temporary
 
             this.scene.add(NameTextmesh);
+
+            barGraph.SetDrawableObject(NameTextmesh);
+            barGraph.SetScaleObjectX(NameTextmesh);
+            barGraph.SetAxisLabelsX(textList);
+            barGraph.SetScaleObjectY(NameTextmesh);
+            barGraph.SetScaleObjectZ(NameTextmesh);
+            barGraph.SetTitleObject(NameTextmesh);
+
         }
-        let barGraph : BarGraph = new BarGraph();
+
 
         return barGraph;
     }
@@ -441,7 +467,6 @@ class GraphRenderer {
             }
         }
     }
-
 }
 
 
@@ -459,6 +484,7 @@ class InputManager{
     PlotTypeId = "plot_type";
     SeperationTypeId = "seperation_type";
     TextTypeId = "text_type";
+    GraphListId = "graph_list";
 
     /**
      * must be initialised with a main grapher to control it and to send inputs to
@@ -582,8 +608,35 @@ class InputManager{
         this.owner.CreateDataSetRequest(rawInput,name,format,plotType,seperationChar,textChar);
     }
 
+    public UpdateGraphList(){
+        let list = document.getElementById(this.GraphListId);
+        
+        // @ts-ignore
+        for (let x = 0;x<list.options.length;x++) {
+            // @ts-ignore
+            list.options[x] = null;
+        }
+        let sets = this.owner.GetDataSets();
+        for (let i =0;i<sets.length;i++) {
+            let option = document.createElement("option");
+            option.value = sets[i].GetID + "";
+            option.innerText = sets[i].GetName;
+            if (sets[i] == this.owner.GetSelectedDataSet()){
+                option.selected = true;
+            }
+            // @ts-ignore
+            list.add(option);
+        }
+    }
 
-
+    public SetSelectedGraph(id:number){
+        let sets = this.owner.GetDataSets();
+        for (let i =0;i<sets.length;i++){
+            if(sets[i].GetID == id){
+                this.owner.SetSelectedDataSet(sets[i]);
+            }
+        }
+    }
 }
 
 //initialise grapher and input manager
@@ -657,6 +710,15 @@ let toggleNumbersInput = document.getElementById("toggle_numbers");
 toggleNumbersInput.onclick = function () {
     // @ts-ignore
     inputManager.ToggleNumbers(this.checked);
+}
+
+/**
+ * change the graph chosen from the list
+ */
+let graphListInput = document.getElementById("graph_list");
+graphListInput.onchange = function () {
+    // @ts-ignore
+    inputManager.SetSelectedGraph(this.value);
 }
 
 

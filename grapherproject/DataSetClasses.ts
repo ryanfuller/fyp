@@ -71,14 +71,19 @@ export class DataSet {
     private rangeX : number[] = [0,0];
     private rangeY : number[] = [0,0];
     private rangeZ : number[] = [0,0];
+    private ID : number;
 
     //pass in name of the graph and then the axis that it uses as well as the maximum ranges of all the values
-    constructor(name : string,dataAxis:Array<DataSetAxis>,rangeX : number[],rangeY : number[],rangeZ : number[]) {
+    constructor(name : string,dataAxis:Array<DataSetAxis>,rangeX : number[],rangeY : number[],rangeZ : number[],id:number) {
         this.name = name;
         this.dataAxis = dataAxis;
         this.rangeX = rangeX;
         this.rangeY = rangeY;
         this.rangeZ = rangeZ;
+        this.ID = id;
+    }
+    get GetID(): number{
+        return this.ID;
     }
     get GetName(): string{
         return this.name;
@@ -115,6 +120,8 @@ export class DataSet {
  */
 export interface Graph {
     //SetScaleObjectX : ()=>typeof THREE.Object3D;
+    SetDrawableObject:(typeof THREE.Object3D);//the parent object to draw that includes all graph objects in it
+    GetDrawableObject():typeof THREE.Object3D;
     SetScaleObjectX:(typeof THREE.Object3D);//the object that when scaled will make the graph bigger in the x
     SetScaleObjectY:(typeof THREE.Object3D);
     SetScaleObjectZ:(typeof THREE.Object3D);
@@ -138,35 +145,61 @@ export interface Graph {
  * */
 export class BarGraph implements Graph{
 
-    SetScaleObjectX: any;
-    SetScaleObjectY: any;
-    SetScaleObjectZ: any;
+    private ScaleObjectX : typeof THREE.Object3D;
+    private ScaleObjectY : typeof THREE.Object3D;
+    private ScaleObjectZ : typeof THREE.Object3D;
+    private TitleLabelObject : typeof THREE.Object3D;
+    private MeshObject : typeof THREE.Object3D;
+    private AxisLabelsX : typeof THREE.Object3D[];
+    private AxisLabelsY : typeof THREE.Object3D[];
+    private AxisLabelsZ : typeof THREE.Object3D[];
+    private fontJSON = require("./helvetiker_regular.typeface.json");
+    private loader = new THREE.FontLoader();
 
-    SetScaleX(num: number): void {
+    private font = this.loader.parse(this.fontJSON);
+
+    private DrawableObject : typeof THREE.Object3D;
+
+    public SetScaleX(num:number){
+        this.ScaleObjectX.scale.x = num/50;
+    }
+    public SetScaleY(num:number){
+        this.ScaleObjectX.scale.z = num/50;
+    }
+    public SetScaleZ(num:number){
+        this.ScaleObjectX.scale.y = num/50;
     }
 
-    SetScaleY(num: number): void {
+    public SetScaleObjectX(obj : typeof THREE.Object3D){
+        this.ScaleObjectX = obj;
+    }
+    public SetScaleObjectY(obj : typeof THREE.Object3D){
+        this.ScaleObjectY = obj;
+    }
+    public SetScaleObjectZ(obj : typeof THREE.Object3D){
+        this.ScaleObjectZ = obj;
     }
 
-    SetScaleZ(num: number): void {
+    public SetAxisLabelsX(NumberListX: typeof THREE.Object3D[]) {
+        this.AxisLabelsX = NumberListX;
     }
 
-    GetObjectsToFaceCamera(): typeof THREE.Object3D[] {
-        return [];
+    public SetAxisLabelsY(NumberListY: typeof THREE.Object3D[]) {
+        this.AxisLabelsY = NumberListY;
     }
 
-    SetAxisLabelsX(numbers: typeof THREE.Object3D[]): void {
+    public SetAxisLabelsZ(NumberListZ: typeof THREE.Object3D[]) {
+        this.AxisLabelsZ = NumberListZ;
     }
 
-    SetAxisLabelsY(numbers: typeof THREE.Object3D[]): void {
+    public SetTitleObject(obj : typeof THREE.Object3D){
+        this.TitleLabelObject = obj;
     }
-
-    SetAxisLabelsZ(numbers: typeof THREE.Object3D[]): void {
-    }
-
-    SetTitleObject: any;
 
     SetTitleText(title: string): void {
+
+        let NameTextgeometry = new THREE.TextGeometry(title,{font : this.font,size:0.5,height:0,material:0});
+        this.TitleLabelObject.geometry = NameTextgeometry;
     }
 
     SetMeshObject: any;
@@ -178,11 +211,21 @@ export class BarGraph implements Graph{
     }
 
     SetNumbersVisable(checked: boolean): void {
+
     }
 
     SetGridObjects(objs: typeof THREE.Object3D[]): void {
     }
 
+    public SetDrawableObject ( obj : typeof THREE.Object3D){
+        this.DrawableObject = obj;
+    }
+    public GetDrawableObject(){
+        return this.DrawableObject;
+    }
+    public GetObjectsToFaceCamera(){
+        return this.AxisLabelsX;
+    }
 
 }
 
@@ -196,6 +239,7 @@ export class SurfaceGraph implements Graph{
     private TitleLabelObject : typeof THREE.Object3D;
     private MeshObject : typeof THREE.Object3D;
 
+    private DrawableObject : typeof THREE.Object3D;
     private AxisLabelsX : typeof THREE.Object3D[];
     private AxisLabelsY : typeof THREE.Object3D[];
     private AxisLabelsZ : typeof THREE.Object3D[];
@@ -206,6 +250,12 @@ export class SurfaceGraph implements Graph{
 
     private font = this.loader.parse(this.fontJSON);
 
+    public SetDrawableObject ( obj : typeof THREE.Object3D){
+        this.DrawableObject = obj;
+    }
+    public GetDrawableObject(){
+        return this.DrawableObject;
+    }
     public SetScaleObjectX(obj : typeof THREE.Object3D){
         this.ScaleObjectX = obj;
     }
@@ -234,13 +284,12 @@ export class SurfaceGraph implements Graph{
 
     public SetAxisLabelsY(NumberListY: typeof THREE.Object3D[]) {
         this.AxisLabelsY = NumberListY;
-
     }
 
     public SetAxisLabelsZ(NumberListZ: typeof THREE.Object3D[]) {
         this.AxisLabelsZ = NumberListZ;
-
     }
+
     public GetObjectsToFaceCamera(){
         let set : typeof THREE.Object3D[] = [];
         set = set.concat(this.AxisLabelsX);
