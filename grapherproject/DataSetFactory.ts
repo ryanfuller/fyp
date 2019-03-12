@@ -1,4 +1,7 @@
-import {DataSet, DataSetAxis, DataSetChannel,Point} from "./DataSetClasses";
+import {DataSet} from "./DataSet";
+import {Point} from "./Point";
+import {DataSetChannel} from "./DataSetChannel";
+import {DataSetAxis} from "./DataSetAxis";
 
 /*
 * creates data sets from files given to it by the grapher for different types of files
