@@ -222,11 +222,22 @@ export class GraphRenderer {
             let NumberListX = new Array<typeof THREE.Object3D>();
             let NumberListY = new Array<typeof THREE.Object3D>();
             let NumberListZ = new Array<typeof THREE.Object3D>();
+            let AmountOfNumbersPerAxis = 5;
 
+            let XExponent = Math.round(Math.log10(dataSet.GetRangeX[1]));
+            let YExponent = Math.round(Math.log10(dataSet.GetRangeX[1]));
+            let ZExponent = Math.round(Math.log10(dataSet.GetRangeX[1]));
+
+            let XNumberDiferance = 10** XExponent;
+            let YNumberDiferance = 10** YExponent;
+            let ZNumberDiferance = 10** ZExponent;
+            /*let XNumberDiferance = Math.round(10 * (dataSet.GetRangeX[1]/AmountOfNumbersPerAxis))/10;
+            let YNumberDiferance = Math.round(10 * (dataSet.GetRangeY[1]/AmountOfNumbersPerAxis))/10;
+            let ZNumberDiferance = Math.round(10 * (dataSet.GetRangeZ[1]/AmountOfNumbersPerAxis))/10;*/
 
             //graph axis objects
-            for (let x = 0; x < dataSet.GetAxis[0].GetChannels.length + 1; x++) {
-                let value = x * dataSet.GetRangeX[1] / dataSet.GetAxis[0].GetChannels.length;
+            for (let x = 0; x < AmountOfNumbersPerAxis+1; x++) {
+                let value = x * XNumberDiferance;
                 let numberGeo = new THREE.TextGeometry("" + Number((value).toFixed(1)), {
                     font: this.font,
                     size: 0.3,
@@ -234,7 +245,7 @@ export class GraphRenderer {
                     material: 0
                 });
                 let number = new THREE.Mesh(numberGeo, blackMaterial);
-                number.position.x = x / dataSet.GetAxis[0].GetChannels.length * graphFixedSize;
+                number.position.x = (value / dataSet.GetRangeX[1]) * graphFixedSize;
                 number.lookAt(this.camera.position);
                 NumberListX.push(number);
                 gridX.add(number);
@@ -244,8 +255,8 @@ export class GraphRenderer {
             axisX.position.x = graphFixedSize + 1;
             NumberListX.push(axisX);
             gridX.add(axisX);
-            for (let y = 0; y < dataSet.GetAxis[0].GetChannels.length + 1; y++) {
-                let value = y * dataSet.GetRangeY[1] / dataSet.GetAxis[0].GetChannels.length;
+            for (let y = 0; y < AmountOfNumbersPerAxis + 1; y++) {
+                let value = y * YNumberDiferance;
                 let numberGeo = new THREE.TextGeometry("" + Number((value).toFixed(1)), {
                     font: this.font,
                     size: 0.3,
@@ -253,7 +264,7 @@ export class GraphRenderer {
                     material: 0
                 });
                 let number = new THREE.Mesh(numberGeo, blackMaterial);
-                number.position.z = -y / dataSet.GetAxis[0].GetChannels.length * graphFixedSize;
+                number.position.z = -(value / dataSet.GetRangeY[1]) * graphFixedSize;
                 number.lookAt(this.camera.position);
                 NumberListY.push(number);
                 gridX.add(number);
@@ -263,8 +274,8 @@ export class GraphRenderer {
             axisY.position.z = -graphFixedSize - 1;
             NumberListY.push(axisY);
             gridX.add(axisY);
-            for (let z = 0; z < dataSet.GetAxis[0].GetChannels.length + 1; z++) {
-                let value = z * dataSet.GetRangeZ[1] / dataSet.GetAxis[0].GetChannels.length;
+            for (let z = 0; z < AmountOfNumbersPerAxis + 1; z++) {
+                let value = z * ZNumberDiferance;
                 let numberGeo = new THREE.TextGeometry("" + Number((value).toFixed(1)), {
                     font: this.font,
                     size: 0.3,
@@ -273,7 +284,7 @@ export class GraphRenderer {
                 });
                 let number = new THREE.Mesh(numberGeo, blackMaterial);
 
-                number.position.y = z / dataSet.GetAxis[0].GetChannels.length * graphFixedSize;
+                number.position.y = (value / dataSet.GetRangeZ[1]) * graphFixedSize;
                 number.lookAt(this.camera.position);
                 NumberListY.push(number);
                 gridX.add(number);
