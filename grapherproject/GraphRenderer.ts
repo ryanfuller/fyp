@@ -149,10 +149,11 @@ export class GraphRenderer {
             let axisScalingFactorZ = graphFixedSize / (dataSet.GetRangeZ[1] - dataSet.GetRangeZ[0]);
 
             //setup materials, wireframe draws the lines on the surface
-            let wireMaterial = new THREE.LineBasicMaterial({color: 0xffffff, linewidth: 2});
+            let wireMaterial = new THREE.LineBasicMaterial({color: 0x000000, linewidth: 2});
             let blackMaterial = new THREE.MeshLambertMaterial({color: 0x000000});
             let redMaterial = new THREE.MeshLambertMaterial({color: 0xff0000});
             let randMaterial = new THREE.MeshLambertMaterial({color: Math.random() * 0xffffff})
+            //let randMaterial = new THREE.MeshNormalMaterial();
             redMaterial.side = THREE.DoubleSide;
             randMaterial.side = THREE.DoubleSide;
 
@@ -210,7 +211,7 @@ export class GraphRenderer {
                 }
             }
 
-
+            geo.computeVertexNormals();
             let mesh = new THREE.Mesh(geo, randMaterial);
 
             //labels and scales

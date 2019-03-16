@@ -147,6 +147,14 @@ class InputManager{
             }
         }
     }
+    SetMaterial(value:string){
+        let dataSet = this.owner.GetSelectedDataSet();
+        if(dataSet != null){
+            if(dataSet.GetGraph!=null){
+                dataSet.GetGraph.SetMaterial(value);
+            }
+        }
+    }
     ChangeGraphColour(value: string) {
         let dataSet = this.owner.GetSelectedDataSet();
         if(dataSet != null){
@@ -335,6 +343,14 @@ graphListInput.onchange = function () {
     inputManager.SetSelectedGraph(this.value);
 }
 
+/**
+ * change the graph material
+ */
+let graphMaterialInput = document.getElementById("Material_input");
+graphMaterialInput.onchange = function () {
+    // @ts-ignore
+    inputManager.SetMaterial(this.value);
+}
 
 
 

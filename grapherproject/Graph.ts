@@ -28,6 +28,8 @@ export interface Graph {
 
     SetTitleObject: (typeof THREE.Object3D);
 
+    SetMaterial(colour: string): void;
+
     SetColour(colour: string): void;
 
     SetMeshObject: (typeof THREE.Object3D);//get the main mesh for the graph
@@ -36,4 +38,5 @@ export interface Graph {
     SetGridVisable(checked: boolean): void;
 
     SetNumbersVisable(checked: boolean): void;
+    
 }

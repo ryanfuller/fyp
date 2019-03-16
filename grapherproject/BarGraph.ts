@@ -95,4 +95,7 @@ export class BarGraph implements Graph {
         return this.AxisLabelsX;
     }
 
+    SetMaterial(colour: string): void {
+    }
+
 }

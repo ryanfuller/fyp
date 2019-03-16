@@ -91,6 +91,31 @@ export class SurfaceGraph implements Graph {
         this.MeshObject = obj;
     }
 
+    SetMaterial(matName: string): void {
+        switch (matName) {
+            case "diffuse":{
+                let mat = new THREE.MeshLambertMaterial();
+                mat.side = THREE.DoubleSide;
+                this.MeshObject.material = mat;
+                break;
+            }
+            case "colourful":{
+                let mat = new THREE.MeshNormalMaterial();
+                mat.side = THREE.DoubleSide;
+                this.MeshObject.material = mat;
+                break;
+            }
+            case "transparent":{
+                let mat = new THREE.MeshPhongMaterial( {opacity: 0.0, transparent: true } );
+                //let mat = new THREE.MeshPhongMaterial( { color: 0x000000, specular: 0x666666, emissive: 0xff0000, shininess: 10, opacity: 0.9, transparent: true } );
+                mat.side = THREE.DoubleSide;
+                this.MeshObject.material = mat;
+                break;
+            }
+            default:{break;}
+        }
+    }
+
     SetColour(colour: string): void {
         let mat = new THREE.MeshLambertMaterial({color: colour});
         mat.side = THREE.DoubleSide;
