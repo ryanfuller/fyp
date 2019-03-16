@@ -225,19 +225,20 @@ export class GraphRenderer {
             let AmountOfNumbersPerAxis = 5;
 
             let XExponent = Math.round(Math.log10(dataSet.GetRangeX[1]));
-            let YExponent = Math.round(Math.log10(dataSet.GetRangeX[1]));
-            let ZExponent = Math.round(Math.log10(dataSet.GetRangeX[1]));
+            let YExponent = Math.round(Math.log10(dataSet.GetRangeY[1]));
+            let ZExponent = Math.round(Math.log10(dataSet.GetRangeZ[1]));
 
-            let XNumberDiferance = 10** XExponent;
-            let YNumberDiferance = 10** YExponent;
-            let ZNumberDiferance = 10** ZExponent;
+            let XNumberDiferance = 10** (XExponent-1);
+            let YNumberDiferance = 10** (YExponent-1);
+            let ZNumberDiferance = 10** (ZExponent-1);
             /*let XNumberDiferance = Math.round(10 * (dataSet.GetRangeX[1]/AmountOfNumbersPerAxis))/10;
             let YNumberDiferance = Math.round(10 * (dataSet.GetRangeY[1]/AmountOfNumbersPerAxis))/10;
             let ZNumberDiferance = Math.round(10 * (dataSet.GetRangeZ[1]/AmountOfNumbersPerAxis))/10;*/
 
             //graph axis objects
             for (let x = 0; x < AmountOfNumbersPerAxis+1; x++) {
-                let value = x * XNumberDiferance;
+                console.log(dataSet.GetRangeX[1]/(10**XExponent));
+                let value = x * XNumberDiferance* Math.round(2* (dataSet.GetRangeX[1]/(10**XExponent)));
                 let numberGeo = new THREE.TextGeometry("" + Number((value).toFixed(1)), {
                     font: this.font,
                     size: 0.3,
@@ -256,7 +257,7 @@ export class GraphRenderer {
             NumberListX.push(axisX);
             gridX.add(axisX);
             for (let y = 0; y < AmountOfNumbersPerAxis + 1; y++) {
-                let value = y * YNumberDiferance;
+                let value = y * YNumberDiferance*Math.round(2* (dataSet.GetRangeY[1]/(10**YExponent)));
                 let numberGeo = new THREE.TextGeometry("" + Number((value).toFixed(1)), {
                     font: this.font,
                     size: 0.3,
@@ -275,7 +276,7 @@ export class GraphRenderer {
             NumberListY.push(axisY);
             gridX.add(axisY);
             for (let z = 0; z < AmountOfNumbersPerAxis + 1; z++) {
-                let value = z * ZNumberDiferance;
+                let value = z * ZNumberDiferance*Math.round(2* (dataSet.GetRangeZ[1]/(10**ZExponent)));
                 let numberGeo = new THREE.TextGeometry("" + Number((value).toFixed(1)), {
                     font: this.font,
                     size: 0.3,
