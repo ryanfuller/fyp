@@ -35,7 +35,20 @@ class Grapher {
         this.graphRenderer.RemoveAllGraphsFromScene(this.dataSets);
         this.graphRenderer.DrawGraph(dataSet);
     }
-
+    public DeleteSelectedDataSet() {
+        this.graphRenderer.RemoveAllGraphsFromScene(this.dataSets);
+        for(let i = 0; i<this.dataSets.length;i++){
+            if(this.dataSets[i] == this.selectedDataSet){
+                this.dataSets.splice(i,1);
+            }
+        }
+        this.selectedDataSet = null;
+        if (this.dataSets.length > 0){
+            this.selectedDataSet = this.dataSets[0];
+            this.graphRenderer.DrawGraph(this.selectedDataSet);
+        }
+        this.inputManager.UpdateGraphList();
+    }
     public GetGraphRenderer(){
         return this.graphRenderer;
     }
@@ -81,6 +94,8 @@ class Grapher {
             alert("the data supplied was not formatted correctly, please check your file and retry");
         }
     }
+
+
 }
 
 
@@ -232,22 +247,32 @@ class InputManager{
 
     public UpdateGraphList(){
         let list = document.getElementById(this.GraphListId);
-        
+
         // @ts-ignore
-        for (let x = 0;x<list.options.length;x++) {
+        console.log("length of delete list " + list.options.length);
+        // @ts-ignore
+        while (0<list.options.length) {
             // @ts-ignore
-            list.options[x] = null;
+            list.options[0].value = "";
+            // @ts-ignore
+            list.options[0].innerText = "";
+            // @ts-ignore
+            list.options[0] = null;
         }
         let sets = this.owner.GetDataSets();
+        //console.log(sets);
+        //console.log(this.owner.GetSelectedDataSet());
+        console.log("length of create list " + sets.length);
         for (let i =0;i<sets.length;i++) {
             let option = document.createElement("option");
             option.value = sets[i].GetID + "";
             option.innerText = sets[i].GetName;
-            if (sets[i] == this.owner.GetSelectedDataSet()){
+            if (sets[i].GetID == this.owner.GetSelectedDataSet().GetID){
                 option.selected = true;
             }
             // @ts-ignore
             list.add(option);
+            console.log("added" +option.innerText);
         }
     }
 
@@ -257,6 +282,12 @@ class InputManager{
             if(sets[i].GetID == id){
                 this.owner.SetSelectedDataSet(sets[i]);
             }
+        }
+    }
+    public DeleteSelectedGraph(){
+        let sets = this.owner.GetDataSets();
+        if (sets.length > 0){
+            this.owner.DeleteSelectedDataSet();
         }
     }
 }
@@ -351,6 +382,17 @@ graphMaterialInput.onchange = function () {
     // @ts-ignore
     inputManager.SetMaterial(this.value);
 }
+
+
+/**
+ * change the graph material
+ */
+let deleteGraphInput = document.getElementById("delete_graph");
+deleteGraphInput.onclick = function () {
+    // @ts-ignore
+    inputManager.DeleteSelectedGraph();
+}
+
 
 
 
