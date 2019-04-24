@@ -15,7 +15,6 @@ export interface Graph {
 
     SetAxisLabelsX(numbers: typeof THREE.Object3D[]): void;//the labels for the x axis so that they can be pointed in the right direction
     SetAxisLabelsY(numbers: typeof THREE.Object3D[]): void;
-
     SetAxisLabelsZ(numbers: typeof THREE.Object3D[]): void;
 
     SetScaleX(num: number): void;//function to scale the graph on the x axis

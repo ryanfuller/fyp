@@ -94,8 +94,6 @@ class Grapher {
             alert("the data supplied was not formatted correctly, please check your file and retry");
         }
     }
-
-
 }
 
 
